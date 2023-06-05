@@ -1,0 +1,5 @@
+python-pdfbox
+beautifulsoup4
+fake-useragent
+selenium
+PyPDF2

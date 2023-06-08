@@ -26,7 +26,9 @@ $(which python3.9) -c "import os; from app import crawler; crawler.scrape_url(ba
 #### Prequisites:
 [] helm
 
-1. Build the postgresml-enabled Postgres instance image (if not already built):
+1. Build the postgresml-enabled Postgres instance image
+   (NOTE: Skip if already built; 
+    also, must build on a network with sufficient bandwidth - example, might run into issues behind some VPNs):
 ```
 source .env
 scripts/build-postgresml-baseimage.sh

@@ -18,11 +18,8 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 
 # postgresml dependencies
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
-    # && wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
     && apt-get update -y \
     && . $HOME/.cargo/env
-    # && rm /usr/share/keyrings/kitware-archive-keyring.gpg \
-    # && apt-get install kitware-archive-keyring
 
 # prep for core
 RUN apt-get install -y --no-install-recommends bison build-essential clang flex \

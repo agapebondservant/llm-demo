@@ -23,3 +23,30 @@ $(which python3.9) -c "import os; from app import crawler; crawler.scrape_url(ba
 ```         
 
 ### Deploy Bitnami Postgres on Kubernetes<a name="pg4k8s"/>
+#### Prequisites:
+[] helm
+
+1. Build the postgresml-enabled Postgres instance image (if not already built):
+```
+source .env
+scripts/build-postgresml-baseimage.sh
+watch kubectl get pvc -n ${DATA_E2E_POSTGRESML_NS}
+```
+
+2. Deploy Postgres instance:
+```
+scripts/deploy-postgresml-cluster.sh
+watch kubectl get all -n ${DATA_E2E_POSTGRESML_NS}
+```
+
+3. To get the connect string for the postgresml-enabled instance:
+```
+export POSTGRESML_PW=$(kubectl get secret postgresml-db-secret -n postgresml -ojsonpath='{.data.password }' | base64 --decode)
+export POSTGRESML_ENDPOINT=$(kubectl get svc postgresml -npostgresml -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
+echo postgresql://pgadmin:${POSTGRESML_PW}@${POSTGRESML_ENDPOINT}/postgresml?sslmode=require
+```
+
+4. To delete the Postgres instance:
+```
+script/delete-postgresml-cluster.sh
+```

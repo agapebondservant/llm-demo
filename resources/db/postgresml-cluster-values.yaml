@@ -1,0 +1,54 @@
+global:
+  postgresql:
+    nameOverride: postgresml
+    storageClass: generic
+    auth:
+      postgresPassword: "docker"
+      username: "docker"
+      password: "docker"
+      database: "postgresml"
+
+image:
+  repository: oawofolu/postgresml-bitnami
+  tag: 15.3.0-debian-11-r7
+  debug: true
+
+primary:
+  extraVolumes:
+    - name: postgres-seed
+      persistentVolumeClaim:
+        claimName: postgres-seed-pvc
+  extendedConfiguration: |
+    shared_preload_libraries = 'pgml,vector,pgaudit,pg_stat_statements'
+
+  extraVolumeMounts:
+    - mountPath: /docker-entrypoint-initdb.d
+      name: postgres-seed
+
+  service:
+    type: LoadBalancer
+
+  initdb:
+    user: "docker"
+    password: "docker"
+    scripts:
+      00_init_extensions.sh: |-
+        #/bin/bash
+        echo 'here'
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update -y
+        apt-get install -y --no-install-recommends software-properties-common gpg-agent lsb-core
+        echo "deb [trusted=yes] https://apt.postgresml.org $(lsb_release -cs) main" >> /etc/apt/sources.list
+        add-apt-repository ppa:deadsnakes/ppa
+        apt-get install -y --no-install-recommends python3.10 python3-pip g++ gcc git default-libmysqlclient-dev curl lsb-release tzdata sudo make cmake libpq-dev libclang-dev wget git postgresql-pgml-14
+        apt-get clean
+        rm -rf /var/lib/apt/lists/*
+      01_init_extensions.sh: |-
+        #/bin/bash
+        echo 'here 2'
+        cd /tmp
+        git clone --branch v0.4.1 https://github.com/pgvector/pgvector.git
+        cd pgvector
+        make
+        make install
+        cd ~ && rm -rf /tmp/pgvector

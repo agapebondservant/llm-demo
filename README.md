@@ -3,6 +3,7 @@
 ## Contents
 1. [Set up web crawler](#crawler)
 2. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
+3. [Set up HuggingFace model repo](#huggingfacerepo)
 
 ### Set up web crawler<a name="crawler"/>
 
@@ -24,7 +25,7 @@ $(which python3.9) -c "import os; from app import crawler; crawler.scrape_url(ba
 
 ### Deploy Bitnami Postgres on Kubernetes<a name="pg4k8s"/>
 #### Prequisites:
-[] helm
+-[ ] helm
 
 1. Build the postgresml-enabled Postgres instance image
    (NOTE: Skip if already built; 
@@ -51,4 +52,20 @@ echo postgresql://pgadmin:${POSTGRESML_PW}@${POSTGRESML_ENDPOINT}/postgresml?ssl
 4. To delete the Postgres instance:
 ```
 script/delete-postgresml-cluster.sh
+```
+
+### Set up HuggingFace model repo<a name="huggingfacerepo"/>
+#### Prequisites:
+- [ ] git-lfs
+- [ ] Set up SSH Key for account <DATA_E2E_HUGGINGFACE_USERNAME>: <a href="https://huggingface.co/settings/keys" target="_blank">link</a>
+
+1. Set up repo:
+```
+export REPO_NAME=<your repo name>
+scripts/create_huggingface_model_repo.sh $REPO_NAME
+```
+
+2. Publish a model to the repo:
+```
+scripts/save_dummy_huggingface_model.sh $REPO_NAME
 ```

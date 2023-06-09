@@ -3,3 +3,4 @@ beautifulsoup4
 fake-useragent
 selenium
 PyPDF2
+huggingface_hub

@@ -1,8 +1,10 @@
-# ARG defaults
-ARG IMAGE_TAG=15.3.0-debian-11-r7
-ARG PG_VS=15
+# ARG declarations
+ARG IMAGE_TAG_VAL=15.3.0-debian-11-r7
+ARG PG_VS_VAL
 
-FROM bitnami/postgresql:${IMAGE_TAG}
+FROM bitnami/postgresql:${IMAGE_TAG_VAL}
+
+ENV PG_VS=${PG_VS_VAL:-15}
 USER root
 
 # General dependencies
@@ -48,6 +50,10 @@ RUN cd /tmp \
     && make \
     && make install \
     && cd ~ && rm -rf /tmp/pgvector
+
+# additional
+RUN mkdir -p /.cache/huggingface \
+    && chmod 777 /.cache/huggingface
 
 EXPOSE 5432
 USER 1001

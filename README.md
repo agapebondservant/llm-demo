@@ -1,9 +1,19 @@
 # LLMOps Demo with TAP, postgresml, Argo Workflows and MLflow
 
 ## Contents
-1. [Set up web crawler](#crawler)
-2. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
-3. [Set up HuggingFace model repo](#huggingfacerepo)
+1. [Set up access control/credentials](#accesscontrol)
+2. [Set up web crawler](#crawler)
+3. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
+4. [Set up HuggingFace model repo](#huggingfacerepo)
+
+### Set up access control/credentials<a name="accesscontrol"/>
+```
+source .env
+tanzu secret registry delete registry-credentials -n default -y || true
+tanzu secret registry add registry-credentials --username ${DATA_E2E_REGISTRY_USERNAME} --password ${DATA_E2E_REGISTRY_PASSWORD} --server https://index.docker.io/v1/ --export-to-all-namespaces --yes -ndefault
+kubectl apply -f config/tap-rbac.yaml -ndefault
+kubectl apply -f config/tap-rbac-2.yaml -ndefault
+```
 
 ### Set up web crawler<a name="crawler"/>
 
@@ -51,7 +61,7 @@ echo postgresql://pgadmin:${POSTGRESML_PW}@${POSTGRESML_ENDPOINT}/postgresml?ssl
 
 4. To delete the Postgres instance:
 ```
-script/delete-postgresml-cluster.sh
+scripts/delete-postgresml-cluster.sh
 ```
 
 ### Set up HuggingFace model repo<a name="huggingfacerepo"/>

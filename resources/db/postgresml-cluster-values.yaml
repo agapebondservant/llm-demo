@@ -14,16 +14,22 @@ image:
   debug: true
 
 primary:
-  extraVolumes:
-    - name: postgres-seed
-      persistentVolumeClaim:
-        claimName: postgres-seed-pvc
   extendedConfiguration: |
     shared_preload_libraries = 'pgml,vector,pgaudit,pg_stat_statements'
 
-  extraVolumeMounts:
-    - mountPath: /docker-entrypoint-initdb.d
-      name: postgres-seed
+  initdb:
+    user: "docker"
+    password: "docker"
+    scripts:
+      00_init_extensions.sh: |-
+        #/bin/bash
+        echo "Setting huggingface cache directory..."
+        mkdir -p /opt/cache/huggingface/transformers
+        ls -ltra /opt/cache
+
+  extraEnvVars:
+    - name: HF_HOME
+      value: ./opt/cache
 
   service:
     type: LoadBalancer

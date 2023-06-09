@@ -41,9 +41,7 @@ RUN cd /tmp/postgresml/pgml-extension \
     && cp target/release/pgml-pg${PG_VS}/opt/bitnami/postgresql/share/extension/* /opt/bitnami/postgresql/share/extension \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && cd ~ && rm -rf /tmp/postgresml \
-    && mkdir -p /.cache/huggingface \
-    && chmod 777 /.cache/huggingface
+    && cd ~ && rm -rf /tmp/postgresml
 
 # pgvector
 RUN cd /tmp \

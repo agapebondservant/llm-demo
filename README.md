@@ -5,6 +5,7 @@
 2. [Set up web crawler](#crawler)
 3. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
 4. [Set up HuggingFace model repo](#huggingfacerepo)
+5. [Integrate HuggingFace model with DataHub](#datahub)
 
 ### Set up access control/credentials<a name="accesscontrol"/>
 ```
@@ -72,10 +73,61 @@ scripts/delete-postgresml-cluster.sh
 1. Set up repo:
 ```
 export REPO_NAME=<your repo name>
-scripts/create_huggingface_model_repo.sh $REPO_NAME
+scripts/create-huggingface-model-repo.sh $REPO_NAME
 ```
 
 2. Publish a model to the repo:
 ```
-scripts/save_dummy_huggingface_model.sh $REPO_NAME
+scripts/save-dummy-huggingface-model.sh $REPO_NAME
+```
+
+### Integrate HuggingFace model with DataHub<a name="datahub"/>
+1. Run DataHub Metadata Emitter:
+```
+$(which python3.9)  -c "from app import datahub_emitter; import os; datahub_emitter.send_metadata('tanzuhuggingface/dev', \
+                             'nlp', \
+                              'DEV', \
+                              os.getenv('DATA_E2E_DATAHUB_GMS_URL'), \
+                              'Fine-tuned DistilBERT model')"
+```
+2. Set up Argo Workflows (if not already setup):
+
+* Set up secrets:
+```
+source .env
+tanzu secret registry delete registry-credentials -n default -y || true
+tanzu secret registry add registry-credentials --username ${DATA_E2E_REGISTRY_USERNAME} --password ${DATA_E2E_REGISTRY_PASSWORD} --server https://index.docker.io/v1/ --export-to-all-namespaces --yes -ndefault
+kubectl apply -f resources/appcr/tap-rbac.yaml -ndefault
+kubectl apply -f resources/appcr/tap-rbac-2.yaml -ndefault
+```
+
+* Set up Argo Workflows (if not already setup):
+```
+source .env
+kubectl create ns argo
+kubectl apply -f resources/argo/argo-workflow.yaml -nargo
+envsubst < resources/argo/argo-workflow-http-proxy.in.yaml > resources/argo/argo-workflow-http-proxy.yaml
+kubectl apply -f resources/argo/argo-workflow-http-proxy.yaml -nargo
+kubectl create rolebinding default-admin --clusterrole=admin --serviceaccount=argo:default -n argo
+kubectl apply -f resources/argo/argo-workflow-rbac.yaml -nargo
+```
+
+* To login to Argo, copy the token from here:
+```
+kubectl -n argo exec $(kubectl get pod -n argo -l 'app=argo-server' -o jsonpath='{.items[0].metadata.name}') -- argo auth token
+```
+
+3. Set up GitOps sync hook with kappcontroller's App CR:
+```
+kapp deploy -a huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -f resources/appcr/pipeline_app.yaml --logs -y  -nargo
+```
+
+4. View progress:
+```
+kubectl get app huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -oyaml  -nargo
+```
+
+* To delete the pipeline:
+```
+kapp delete -a huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -y -nargo
 ```

@@ -17,6 +17,15 @@ primary:
   extendedConfiguration: |
     shared_preload_libraries = 'pgml,vector,pgaudit,pg_stat_statements'
 
+  extraVolumes:
+  - name: cache-dir
+    persistentVolumeClaim:
+      claimName: postgres-seed-pvc
+
+  extraVolumeMounts:
+    - mountPath: /opt/cache
+      name: cache-dir
+
   initdb:
     user: "docker"
     password: "docker"
@@ -29,7 +38,7 @@ primary:
 
   extraEnvVars:
     - name: HF_HOME
-      value: ./opt/cache
+      value: /opt/cache
 
   service:
     type: LoadBalancer

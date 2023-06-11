@@ -1,19 +1,19 @@
 apiVersion: kappctrl.k14s.io/v1alpha1
 kind: App
 metadata:
-  name: ml-image-processing-pipeline-app-kfpmain
+  name: huggingface-tanzudev-monitor
 spec:
   serviceAccountName: default
   fetch:
     - git:
-        url: https://github.com/agapebondservant/ml-image-processing-app
-        ref: origin/kfp-main
+        url: https://tanzuhuggingface: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@huggingface.co/tanzuhuggingface/dev
+        ref: origin/main
 
   template:
     - ytt:
         paths:
-          - config/cifar/pipeline.yaml
-          - config/cifar/values.yaml
+          - resources/appcr/pipeline.yaml
+          - resources/appcr/values.yaml
 
   deploy:
     - kapp: {}

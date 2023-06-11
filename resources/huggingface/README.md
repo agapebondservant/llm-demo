@@ -19,3 +19,19 @@ metrics:
 - metric1
 - metric2
 ---
+
+# Model Card for dev
+
+This is a sample Tanzu model which was generated for demonstration purposes.
+
+## Model Details
+
+**Model Description:**
+
+- **Developed by:** : tanzuhuggingface
+
+- **Model type** : Open Generative QA
+
+- **Language(s) (NLP)** : English
+
+- **Finetuned from model** : distilbert-base-cased-distilled-squad

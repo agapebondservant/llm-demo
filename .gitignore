@@ -1,3 +1,4 @@
 docs
 .env
 dev/
+*.h5

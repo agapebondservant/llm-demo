@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from transformers import BartForConditionalGeneration
+from transformers import BartForConditionalGeneration, BartTokenizer
 
 from dotenv import load_dotenv
 
@@ -24,7 +24,11 @@ print(f"=====================\nSaving model {model_name}...\n===================
 
 model = BartForConditionalGeneration.from_pretrained('sshleifer/distilbart-cnn-12-6')
 
+tokenizer = BartTokenizer.from_pretrained('sshleifer/distilbart-cnn-12-6')
+
 model.save_pretrained('sshleifer/distilbart-cnn-12-6')
+
+tokenizer.save_pretrained('sshleifer/distilbart-cnn-12-6')
 
 os.system(f"cd {repo_name}; mv ../sshleifer/distilbart-cnn-12-6/* .;"
           "rm -rf ../sshleifer; git add .;"

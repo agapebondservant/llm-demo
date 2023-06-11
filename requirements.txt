@@ -7,3 +7,5 @@ huggingface_hub
 acryl-datahub[datahub-rest]
 datahub
 torch
+transformers
+python-dotenv

@@ -1,11 +1,18 @@
 # LLMOps Demo with TAP, postgresml, Argo Workflows and MLflow
 
 ## Contents
-1. [Set up access control/credentials](#accesscontrol)
-2. [Set up web crawler](#crawler)
-3. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
-4. [Set up HuggingFace model repo](#huggingfacerepo)
-5. [Integrate HuggingFace model with DataHub](#datahub)
+1. [Install required Python libraries](#pythonlib)
+2. [Set up access control/credentials](#accesscontrol)
+3. [Set up web crawler](#crawler)
+4. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
+5. [Set up HuggingFace model repo](#huggingfacerepo)
+6. [Integrate HuggingFace model with DataHub](#datahub)
+
+### Install required Python libraries<a name="pythonlib"/>
+Install required Python libraries:
+```
+pip install -r requirements.txt
+```
 
 ### Set up access control/credentials<a name="accesscontrol"/>
 ```

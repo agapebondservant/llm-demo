@@ -5,8 +5,9 @@
 2. [Set up access control/credentials](#accesscontrol)
 3. [Set up web crawler](#crawler)
 4. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
-5. [Set up HuggingFace model repo](#huggingfacerepo)
-6. [Integrate HuggingFace model with DataHub](#datahub)
+5. [Set up Training and Test Dbs](#traintestdbs)
+6. [Set up HuggingFace model repo](#huggingfacerepo)
+7. [Integrate HuggingFace model with DataHub](#datahub)
 
 ### Install required Python libraries<a name="pythonlib"/>
 Install required Python libraries:
@@ -35,10 +36,13 @@ sudo xattr -d com.apple.quarantine /usr/local/bin/chromedriver
 
 2. Test crawler for OneDrive folder:
 ```
+source .env;
+export LB_ENDPOINT=$(kubectl get svc postgresml-bitnami-postgresql -n ${DATA_E2E_POSTGRESML_NS} -o jsonpath="{.status.loadBalancer.ingress[0].hostname}");
+export DATA_E2E_LLMAPP_TRAINING_DB_URI=postgresql://postgres:${DATA_E2E_BITNAMI_AUTH_PASSWORD}@${LB_ENDPOINT}:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE};sslmode=allow;
 LLM_DEMO_EMAIL=oawofolu@vmware.com \
 BASE_URL='https://onevmw.sharepoint.com' \
 FINAL_URL='https://onevmw.sharepoint.com/:f:/r/teams/TSL-v20/Shared%20Documents/Tanzu%20AI%20-%20ML/Demos/LLM%20Demo/docs?csf=1&web=1&e=m67rNF' \
-$(which python3.9) -c "import os; from app import crawler; crawler.scrape_url(base_url_path=os.environ['BASE_URL'], redirect_url_path=os.environ['FINAL_URL'])"
+$(which python3) -c "import os; from app import crawler; crawler.scrape_url(base_url_path=os.environ['BASE_URL'], redirect_url_path=os.environ['FINAL_URL'])"
 ```         
 
 ### Deploy Bitnami Postgres on Kubernetes<a name="pg4k8s"/>
@@ -70,6 +74,25 @@ echo postgresql://pgadmin:${POSTGRESML_PW}@${POSTGRESML_ENDPOINT}/postgresml?ssl
 4. To delete the Postgres instance:
 ```
 scripts/delete-postgresml-cluster.sh
+```
+
+### Set up Training and Test Dbs<a name="traintestdbs"/>
+1. View existing changelogs:
+```
+kubectl exec -it postgresml-bitnami-postgresql-0 -n ${DATA_E2E_POSTGRESML_NS} -- psql postgresql://${DATA_E2E_BITNAMI_AUTH_USERNAME}:${DATA_E2E_BITNAMI_AUTH_PASSWORD}@localhost:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE}?sslmode=allow -c "SELECT id, filename, dateexecuted, orderexecuted from public.databasechangelog ORDER BY id DESC"
+```
+2. Run the following to apply a new changeset to the database:
+```
+source .env
+export DATA_E2E_LLMAPP_TRAINING_DB_URI=postgresql://postgresml-bitnami-postgresql.${DATA_E2E_POSTGRESML_NS}.svc.cluster.local:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE};sslmode=allow \
+XYZSCHEMA=public XYZCHANGESETID=`echo $(date '+%Y%m%d%H%M%s')` \
+envsubst < resources/liquibase/setup.in.yaml > resources/liquibase/setup.yaml
+kubectl apply -f resources/liquibase/setup.yaml -n ${DATA_E2E_POSTGRESML_NS}
+```
+
+3. Verify that the new data schemas were loaded:
+```
+kubectl exec -it postgresml-bitnami-postgresql-0 -n ${DATA_E2E_POSTGRESML_NS} -- psql postgresql://${DATA_E2E_BITNAMI_AUTH_USERNAME}:${DATA_E2E_BITNAMI_AUTH_PASSWORD}@localhost:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE}?sslmode=allow -c "SELECT id, filename, dateexecuted, orderexecuted from public.databasechangelog"
 ```
 
 ### Set up HuggingFace model repo<a name="huggingfacerepo"/>

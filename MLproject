@@ -1,0 +1,14 @@
+name: question_answering_deployment_pipeline
+
+entry_points:
+  publish-model:
+    parameters:
+        dataset-name: {default: "cifar10"}
+    command: '$(which python3) -c "from app.analytics import cifar_cnn_greenplum, mlflow_utils; import mlflow; mlflow_utils.start_new_root_run(); cifar_cnn_greenplum.upload_dataset(\"{dataset-name}\")" >> /tmp/app.log 2>&1'
+  promote_model_to_staging:
+    parameters:
+        base_model-name: {default: "cifar_cnn"}
+        candidate-model-name: {default: "cifar_cnn_gpmain"}
+        dataset-name: {default: "cifar10"}
+        model-flavor: {default: "transformers"}
+    command: '$(which python3) -c "from app.analytics import cifar_cnn_greenplum; cifar_cnn_greenplum.promote_model_to_staging(\"{base_model-name}\", \"{candidate-model-name}\", \"{dataset-name}\", \"{model-flavor}\")" >> /tmp/app.log 2>&1'

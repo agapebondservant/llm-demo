@@ -2,6 +2,8 @@ import pdfbox
 import logging
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -9,15 +11,21 @@ import yaml
 import requests
 import os
 from urllib.parse import urlparse, unquote, quote
+from pypdf import PdfReader
+from dotenv import load_dotenv
+from app import data_loader
 
 options = Options()
-options.add_argument("--window-size=1920,1200")
-# options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--headless=new")
+options.add_argument("--disable-gpu")
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-driver = webdriver.Chrome(options=options, executable_path='/usr/local/bin/chromedriver')
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
+
+load_dotenv()
 
 
 def extract_text_from_pdf(file_path: str):
@@ -33,9 +41,24 @@ def extract_text_from_pdf(file_path: str):
         return handle.read()
 
 
-def scrape_url(base_url_path: str, redirect_url_path: str):
+def extract_metadata_from_pdf(file_path: str):
     """
+    Extracts text and metadata from the given pdf file as a PyPdf object.
+    :param file_path: Location of the pdf file
+    :return: Dictionary representing the pdf
+    """
+    reader = PdfReader(file_path)
+    pages = reader.pages
+    info = reader.metadata
+    number_of_pages = len(pages)
+    data = {**{'/NumberOfPages': number_of_pages}, **info}
+    return data
 
+
+def scrape_url(base_url_path: str, redirect_url_path: str, experiment_name='scraper'):
+    """
+    Scrapes the provides Sharepoint URL for pdf links.
+    :param experiment_name: MLflow experiment that this task will be associated with
     :param base_url_path: Base domain of the Sharepoint folder to scrape (ex. http://onevmw.sharepoint.com)
     :param redirect_url_path: Full URL of the Sharepoint folder to scrape
     :return: A list of locations of the downloaded files
@@ -56,7 +79,8 @@ def scrape_url(base_url_path: str, redirect_url_path: str):
 
     for link in links:
         logger.info(f"Extracting text from pdf files...{link}")
-        extract_text_from_pdf(link)
+        extracted_text = extract_text_from_pdf(link)
+        data_loader.store_tokens(link, extracted_text, experiment_name)
 
     driver.quit()
     return links is not None
@@ -77,7 +101,8 @@ def find_and_download_pdf_links(base_url_path: str, download_path: str):
     result = yaml.load(str(driver.execute_script('return g_listData')))
     logger.debug(yaml.dump(result))
 
-    pdfs = [f"{base_url_path}{quote(row['FileRef'])}" for row in result['ListData']['Row'] if row['File_x0020_Type'] == 'pdf']
+    pdfs = [f"{base_url_path}{quote(row['FileRef'])}" for row in result['ListData']['Row'] if
+            row['File_x0020_Type'] == 'pdf']
     docs = []
 
     for pdf in pdfs:

@@ -2,10 +2,15 @@ python-pdfbox
 beautifulsoup4
 fake-useragent
 selenium
-PyPDF2
+pypdf
 huggingface_hub
 acryl-datahub[datahub-rest]
 datahub
 torch
 transformers
 python-dotenv
+langchain
+tiktoken
+webdriver-manager
+mlflow==2.4.1
+greenplum-python

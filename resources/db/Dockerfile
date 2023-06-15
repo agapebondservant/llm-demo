@@ -52,6 +52,6 @@ RUN cd /tmp \
     && cd ~ && rm -rf /tmp/pgvector
 
 EXPOSE 5432
-USER 1001
+USER postgres
 ENTRYPOINT [ "/opt/bitnami/scripts/postgresql/entrypoint.sh" ]
 CMD [ "/opt/bitnami/scripts/postgresql/run.sh" ]

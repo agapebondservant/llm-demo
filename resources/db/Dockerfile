@@ -8,7 +8,8 @@ ENV PG_VS=${PG_VS_VAL:-15}
 USER root
 
 # General dependencies
-RUN export DEBIAN_FRONTEND=noninteractive \
+RUN useradd -r -u 1002 -g root postgres \
+    && export DEBIAN_FRONTEND=noninteractive \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends wget \
     && wget https://archive.org/download/lsb-compat_9.20161125_amd64/lsb-compat_9.20161125_amd64.deb \
@@ -26,7 +27,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
 # prep for core
 RUN apt-get install -y --no-install-recommends bison build-essential clang flex \
     libopenblas-dev libpython3-dev libreadline-dev libssl-dev pkg-config python3-dev \
-    zlib1g-dev libxml2-dev libxslt-dev libxml2-utils xsltproc ccache postgresql-server-dev-all \
+    zlib1g-dev libxml2-dev libxslt-dev libxml2-utils xsltproc ccache \
     && cd /tmp \
     && git clone https://github.com/postgresml/postgresml \
     && cd postgresml \
@@ -52,6 +53,6 @@ RUN cd /tmp \
     && cd ~ && rm -rf /tmp/pgvector
 
 EXPOSE 5432
-USER postgres
+USER 1002
 ENTRYPOINT [ "/opt/bitnami/scripts/postgresql/entrypoint.sh" ]
 CMD [ "/opt/bitnami/scripts/postgresql/run.sh" ]

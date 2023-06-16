@@ -1,26 +1,60 @@
 #@ load("@ytt:data", "data")
 ---
-apiVersion: serving.knative.dev/v1
-kind: Service
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
 metadata:
-  name: ml-image-processing-pipeline-kfpmain
+  name: llm-image-processing-workflow-main
 spec:
-  template:
-    spec:
-      containers:
-        - image: oawofolu/ml-image-processor-kfp
-          ports:
-            - containerPort: 8080
-          env:
-            - name: MLFLOW_STAGE
-              value: #@ data.values.model_stage
-            - name: GIT_REPO
-              value: #@ data.values.git_repo
-            - name: EXPERIMENT_NAME
-              value: #@ data.values.experiment_name
-            - name: ENVIRONMENT_NAME
-              value: #@ data.values.environment_name
-            - name: KUBEFLOW_PIPELINES_HOST
-              value: #@ data.values.kfp_host
-            - name: USE_CACHE
-              value: #@ data.values.use_cache
+  entrypoint: train
+  volumes:
+    - name: llm-training-vol
+      persistentVolumeClaim:
+        claimName: llm-volume
+  templates:
+    - name: train
+      steps:
+        - - name: run-crawler
+            template: run-selenium
+            arguments:
+              parameters:
+                - name: crawler_email
+                  value: #@ data.values.crawler_email
+                - name: login_url
+                  value: #@ data.values.login_url
+                - name: redirect_url
+                  value: #@ data.values.redirect_url
+                - name: base_image
+                  value: #@ data.values.selenium_base_image
+
+    - name: run-selenium
+      inputs:
+        artifacts:
+          - name: deploy-selenium-code-source
+            path: "/usr/local"
+            git:
+              repo: #@ data.values.git_repo
+              singleBranch: true
+              branch: #@ data.values.environment_name
+        parameters:
+          - name: crawler_email
+          - name: login_url
+          - name: redirect_url
+          - name: base_image
+      script:
+        image: "{{inputs.parameters.base_image}}"
+        volumeMounts:
+          - name: llm-training-vol
+            mountPath: "usr/local/sourcefiles"
+        workingDir: "/usr/local"
+        command: [bash]
+        source: |
+          SCP_PEM_PATH="{{inputs.parameters.pem_file}}" \
+          USER="{{inputs.parameters.user}}" \
+          HOST="{{inputs.parameters.host}}" \
+          SHARED_PATH="{{inputs.parameters.shared_path}}" \
+          GIT_REPO="{{inputs.parameters.git_repo}}" \
+          GIT_REPO_BRANCH="{{inputs.parameters.git_repo_branch}}" \
+          MLPIPELINE_GIT_REPO="{{inputs.parameters.mlpipeline_git_repo}}" \
+          PYFUNC_VENDOR_URI="{{inputs.parameters.pyfunction_vendored_dependencies_uri}}" \
+          NAMESPACE="{{inputs.parameters.inference_namespace}}" \
+          "{{inputs.parameters.shell_script}}"

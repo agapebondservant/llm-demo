@@ -24,6 +24,7 @@ def store_tokens(file_path: str, text: str, experiment_name: str):
     """
     try:
         tokens = extract_chunks_from_text(text)
+
         logger.info(f"Storing tokens for {file_path}...")
         for idx, token in enumerate(tokens):
             ####################
@@ -31,32 +32,33 @@ def store_tokens(file_path: str, text: str, experiment_name: str):
             ###################
 
             # GreenplumPython
-            """db = greenplumpython.database(uri=os.getenv('DATA_E2E_LLMAPP_TRAINING_DB_URI'))
+            db = greenplumpython.database(uri=os.getenv('DATA_E2E_LLMAPP_TRAINING_DB_URI'))
+            logger.info(os.getenv('DATA_E2E_LLMAPP_TRAINING_DB_URI'))
             loader_function_name = 'run_loader_task'
             loader_function = greenplumpython.function(loader_function_name,
                                                        schema=os.getenv('DATA_E2E_LLMAPP_TRAINING_DB_SCHEMA'))
             df = db.apply(lambda: loader_function(file_path, token))
-            status = next(iter(df))[loader_function_name]
-            logger.info(f"Database update status = {status}")"""
+            # status = next(iter(df))[loader_function_name]
+            logger.info(f"Database update status for {file_path}, token {idx}= {df}")
 
             ####################
             # Log token in Mlflow
             ###################
-            """mlflow.get_experiment_by_name(experiment_name) or mlflow.create_experiment(
+            mlflow.get_experiment_by_name(experiment_name) or mlflow.create_experiment(
                 experiment_name,
                 artifact_location="pdfs",
             )
-            os.environ['MLFLOW_EXPERIMENT_NAME'] = experiment_name"""
+            os.environ['MLFLOW_EXPERIMENT_NAME'] = experiment_name
 
-            with mlflow.start_run():
-                mlflow.set_tags({"embeddable_docs": "y"})
-                mlflow.log_text(token, f"{file_path}{idx}")
+        with mlflow.start_run():
+            mlflow.set_tags({"embeddable_docs": "y"})
+            mlflow.log_text(file_path, f"{idx}")
 
-                qa_pipe = pipeline("question-answering", "distilbert-base-cased-distilled-squad")
+            """    qa_pipe = pipeline("question-answering", "distilbert-base-cased-distilled-squad")
                 mlflow.transformers.log_model(
                     transformers_model=qa_pipe,
                     artifact_path="test_pipeline_qa",
-                )
+                )"""
 
     except Exception as ee:
         logger.info("An Exception occurred...", exc_info=True)

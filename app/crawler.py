@@ -17,7 +17,7 @@ from app import data_loader
 
 options = Options()
 options.add_argument("--no-sandbox")
-options.add_argument("--headless=new")
+# options.add_argument("--headless=new")
 options.add_argument("--disable-gpu")
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 

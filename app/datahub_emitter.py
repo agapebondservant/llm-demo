@@ -23,7 +23,8 @@ def send_metadata(model_name: str,
         aspectName="mlModelProperties",
         aspect=models.MLModelPropertiesClass(
             description=model_card.text,
-            customProperties={k: ','.join(v) for (k, v) in model_card.data.to_dict().items()})
+            customProperties={**{k: ','.join(v) for (k, v) in model_card.data.to_dict().items()},
+                              **{'Last Updated': ''}})
     )
 
     emitter.emit(metadata_change_proposal)

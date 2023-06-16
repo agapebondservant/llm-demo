@@ -27,18 +27,27 @@ primary:
       name: cache-dir
 
   initdb:
-    user: "docker"
+    user: "postgres"
     password: "docker"
     scripts:
       00_init_extensions.sh: |-
         #/bin/bash
         echo "Setting huggingface cache directory..."
         mkdir -p /opt/cache/huggingface/transformers
+        chmod -R 766 /opt/cache/huggingface
         ls -ltra /opt/cache
 
   extraEnvVars:
     - name: HF_HOME
       value: /opt/cache
+
+  podSecurityContext:
+    enabled: true
+    fsGroup: 1002
+
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1002
 
   service:
     type: LoadBalancer

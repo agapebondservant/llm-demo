@@ -8,6 +8,7 @@
 5. [Set up Training and Test Dbs](#traintestdbs)
 6. [Set up HuggingFace model repo](#huggingfacerepo)
 7. [Integrate HuggingFace model with DataHub](#datahub)
+8. [Deploy Demo app](#demoapp)
 
 ### Install required Python libraries<a name="pythonlib"/>
 Install required Python libraries:
@@ -54,45 +55,48 @@ $(which python3) -c "import os; from app import crawler; crawler.scrape_url(base
     also, must build on a network with sufficient bandwidth - example, might run into issues behind some VPNs):
 ```
 source .env
+cd resources/db
 scripts/build-postgresml-baseimage.sh
 watch kubectl get pvc -n ${DATA_E2E_POSTGRESML_NS}
+cd -
 ```
 
 2. Deploy Postgres instance:
 ```
-scripts/deploy-postgresml-cluster.sh
+resources/scripts/deploy-postgresml-cluster.sh
 watch kubectl get all -n ${DATA_E2E_POSTGRESML_NS}
 ```
 
 3. To get the connect string for the postgresml-enabled instance:
 ```
-export POSTGRESML_PW=$(kubectl get secret postgresml-db-secret -n postgresml -ojsonpath='{.data.password }' | base64 --decode)
-export POSTGRESML_ENDPOINT=$(kubectl get svc postgresml -npostgresml -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
-echo postgresql://pgadmin:${POSTGRESML_PW}@${POSTGRESML_ENDPOINT}/postgresml?sslmode=require
+export POSTGRESML_PW=${DATA_E2E_BITNAMI_AUTH_PASSWORD}
+export POSTGRESML_ENDPOINT=$(kubectl get svc ${DATA_E2E_BITNAMI_AUTH_DATABASE}-bitnami-postgresql -n${DATA_E2E_POSTGRESML_NS} -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
+echo postgresql://postgres:${POSTGRESML_PW}@${POSTGRESML_ENDPOINT}/${DATA_E2E_BITNAMI_AUTH_DATABASE}?sslmode=require
 ```
 
 4. To delete the Postgres instance:
 ```
-scripts/delete-postgresml-cluster.sh
+resources/scripts/delete-postgresml-cluster.sh
 ```
 
 ### Set up Training and Test Dbs<a name="traintestdbs"/>
-1. View existing changelogs:
-```
-kubectl exec -it postgresml-bitnami-postgresql-0 -n ${DATA_E2E_POSTGRESML_NS} -- psql postgresql://${DATA_E2E_BITNAMI_AUTH_USERNAME}:${DATA_E2E_BITNAMI_AUTH_PASSWORD}@localhost:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE}?sslmode=allow -c "SELECT id, filename, dateexecuted, orderexecuted from public.databasechangelog ORDER BY id DESC"
-```
-2. Run the following to apply a new changeset to the database:
+1. Run the following to apply a new changeset to the database:
 ```
 source .env
-export DATA_E2E_LLMAPP_TRAINING_DB_URI=postgresql://postgresml-bitnami-postgresql.${DATA_E2E_POSTGRESML_NS}.svc.cluster.local:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE};sslmode=allow \
+export DATA_E2E_LIQUIBASE_TRAINING_DB_URI=postgresql://postgresml-bitnami-postgresql.${DATA_E2E_POSTGRESML_NS}.svc.cluster.local:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE};sslmode=allow \
 XYZSCHEMA=public XYZCHANGESETID=`echo $(date '+%Y%m%d%H%M%s')` \
 envsubst < resources/liquibase/setup.in.yaml > resources/liquibase/setup.yaml
 kubectl apply -f resources/liquibase/setup.yaml -n ${DATA_E2E_POSTGRESML_NS}
 ```
 
+2. Verify that the migration job ran without errors:
+```
+kubectl logs job/liquibase -n ${DATA_E2E_POSTGRESML_NS}
+```
+
 3. Verify that the new data schemas were loaded:
 ```
-kubectl exec -it postgresml-bitnami-postgresql-0 -n ${DATA_E2E_POSTGRESML_NS} -- psql postgresql://${DATA_E2E_BITNAMI_AUTH_USERNAME}:${DATA_E2E_BITNAMI_AUTH_PASSWORD}@localhost:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE}?sslmode=allow -c "SELECT id, filename, dateexecuted, orderexecuted from public.databasechangelog"
+kubectl exec -it postgresml-bitnami-postgresql-0 -n ${DATA_E2E_POSTGRESML_NS} -- psql postgresql://postgres:${DATA_E2E_BITNAMI_AUTH_PASSWORD}@localhost:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE}?sslmode=allow -c "SELECT id, filename, dateexecuted, orderexecuted from public.databasechangelog"
 ```
 
 ### Set up HuggingFace model repo<a name="huggingfacerepo"/>
@@ -103,12 +107,12 @@ kubectl exec -it postgresml-bitnami-postgresql-0 -n ${DATA_E2E_POSTGRESML_NS} --
 1. Set up repo:
 ```
 export REPO_NAME=<your repo name>
-scripts/create-huggingface-model-repo.sh $REPO_NAME
+resources/scripts/create-huggingface-model-repo.sh $REPO_NAME
 ```
 
 2. Publish a model to the repo:
 ```
-scripts/save-dummy-huggingface-model.sh $REPO_NAME
+resources/scripts/save-dummy-huggingface-model.sh $REPO_NAME
 ```
 
 ### Integrate HuggingFace model with DataHub<a name="datahub"/>
@@ -160,4 +164,27 @@ kubectl get app huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -oyaml  
 * To delete the pipeline:
 ```
 kapp delete -a huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -y -nargo
+```
+
+### Deploy Demo app<a name="demoapp"/>
+* Deploy the app:
+```
+source .env
+envsubst < resources/tapworkloads/workload.in.yaml > config/workload.yaml
+tanzu apps workload create llm-demo -f resources/tapworkloads/workload.yaml --yes
+```
+
+* Tail the logs of the main app:
+```
+tanzu apps workload tail llm-demo --since 64h
+```
+
+* Once deployment succeeds, get the URL for the main app:
+```
+tanzu apps workload get llm-demo     #should yield llm-demo.default.<your-domain>
+```
+
+* To delete the app:
+```
+tanzu apps workload delete llm-demo --yes
 ```

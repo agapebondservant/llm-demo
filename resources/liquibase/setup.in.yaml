@@ -62,8 +62,8 @@ spec:
             - liquibase
             - update
             - --changelog-file=changelog/setup.sql
-            - --url=jdbc:${DATA_E2E_LLMAPP_TRAINING_DB_URI}
-            - --username=${DATA_E2E_BITNAMI_AUTH_USERNAME}
+            - --url=jdbc:${DATA_E2E_LIQUIBASE_TRAINING_DB_URI}
+            - --username=postgres
             - --password=${DATA_E2E_BITNAMI_AUTH_PASSWORD}
             - --log-level=debug
           volumeMounts:

@@ -7,7 +7,6 @@ metadata:
 spec:
   entrypoint: train
   templates:
-
     - name: train
       steps:
         - - name: publish-model
@@ -30,7 +29,6 @@ spec:
                   value: "promote_model_to_staging"
         - - name: deploy-to-edge
             template: deploy-db
-
     - name: deploy-db
       container:
         image: docker/whalesay
@@ -40,7 +38,6 @@ spec:
           limits:
             memory: 32Mi
             cpu: 100m
-
     - name: run-training
       inputs:
         parameters:

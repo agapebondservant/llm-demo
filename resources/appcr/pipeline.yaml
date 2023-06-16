@@ -36,7 +36,7 @@ spec:
         image: docker/whalesay
         command: [ cowsay ]
         args: [ "This task will be responsible for migrating embeddings to edge DB instances" ]
-        resources: # limit the resources
+        resources:
           limits:
             memory: 32Mi
             cpu: 100m

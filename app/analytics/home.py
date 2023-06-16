@@ -53,7 +53,8 @@ with tab1:
 
 # AIBot
 with tab2:
-    st.write("This bot uses <b>on-premise data</a> to provide information about VMware technologies.<br/>")
+    st.markdown("This bot uses <b>on-premise data</b> to provide information about VMware technologies.<br/>",
+                unsafe_allow_html=True)
 
     question = st.text_input('Your question', '''''', key='aibot')  # , on_change=)
 

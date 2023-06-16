@@ -6,7 +6,7 @@ spec:
   serviceAccountName: default
   fetch:
     - git:
-        url: https://tanzuhuggingface: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@huggingface.co/tanzuhuggingface/dev
+        url: https://github.com/agapebondservant/llm-demo.git
         ref: origin/main
 
   template:

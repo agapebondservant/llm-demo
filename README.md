@@ -112,13 +112,13 @@ resources/scripts/create-huggingface-model-repo.sh $REPO_NAME
 
 2. Publish a model to the repo:
 ```
-resources/scripts/save-dummy-huggingface-model.sh $REPO_NAME
+resources/scripts/save-dummy-huggingface-model-summarization.sh $REPO_NAME
 ```
 
 ### Integrate HuggingFace model with DataHub<a name="datahub"/>
 1. Run DataHub Metadata Emitter:
 ```
-$(which python3.9)  -c "from app import datahub_emitter; import os; datahub_emitter.send_metadata('tanzuhuggingface/dev', \
+$(which python3.9)  -c "from app.analytics import model_customization; import os; model_customization.send_metadata('tanzuhuggingface/dev', \
                              'nlp', \
                               'DEV', \
                               os.getenv('DATA_E2E_DATAHUB_GMS_URL'), \

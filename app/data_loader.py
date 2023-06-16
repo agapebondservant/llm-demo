@@ -37,20 +37,19 @@ def store_tokens(file_path: str, text: str, experiment_name: str):
             loader_function_name = 'run_loader_task'
             loader_function = greenplumpython.function(loader_function_name,
                                                        schema=os.getenv('DATA_E2E_LLMAPP_TRAINING_DB_SCHEMA'))
-            df = db.apply(lambda: loader_function(file_path, token))
+            # df = db.apply(lambda: loader_function(file_path, token))
             # status = next(iter(df))[loader_function_name]
-            logger.info(f"Database update status for {file_path}, token {idx}= {df}")
+            # logger.info(f"Database update status for {file_path}, token {idx}= {status}")
 
-            ####################
-            # Log token in Mlflow
-            ###################
+        ####################
+        # Log token in Mlflow
+        ####################
+        with mlflow.start_run():
             mlflow.get_experiment_by_name(experiment_name) or mlflow.create_experiment(
                 experiment_name,
                 artifact_location="pdfs",
             )
             os.environ['MLFLOW_EXPERIMENT_NAME'] = experiment_name
-
-        with mlflow.start_run():
             mlflow.set_tags({"embeddable_docs": "y"})
             mlflow.log_text(file_path, f"{idx}")
 

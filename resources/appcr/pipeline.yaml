@@ -3,58 +3,62 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  name: llm-image-processing-workflow-main
+  name: llm-image-processing-workflow
 spec:
   entrypoint: train
-  volumes:
-    - name: llm-training-vol
-      persistentVolumeClaim:
-        claimName: llm-volume
   templates:
+
     - name: train
       steps:
-        - - name: run-crawler
-            template: run-selenium
+        - - name: publish-model
+            template: run-training
             arguments:
               parameters:
-                - name: crawler_email
-                  value: #@ data.values.crawler_email
-                - name: login_url
-                  value: #@ data.values.login_url
-                - name: redirect_url
-                  value: #@ data.values.redirect_url
-                - name: base_image
-                  value: #@ data.values.selenium_base_image
+                - name: mlflow_entry
+                  value: "publish_model"
+        - - name: send-metadata
+            template: run-training
+            arguments:
+              parameters:
+                - name: mlflow_entry
+                  value: "send_metadata"
+        - - name: promote-model-to-staging
+            template: run-training
+            arguments:
+              parameters:
+                - name: mlflow_entry
+                  value: "promote_model_to_staging"
+        - - name: deploy-to-edge
+            template: deploy-db
 
-    - name: run-selenium
+    - name: deploy-db
+      container:
+        image: docker/whalesay
+        command: [ cowsay ]
+        args: [ "This task will be responsible for migrating embeddings to edge DB instances" ]
+        resources: # limit the resources
+          limits:
+            memory: 32Mi
+            cpu: 100m
+
+    - name: run-training
       inputs:
-        artifacts:
-          - name: deploy-selenium-code-source
-            path: "/usr/local"
-            git:
-              repo: #@ data.values.git_repo
-              singleBranch: true
-              branch: #@ data.values.environment_name
         parameters:
-          - name: crawler_email
-          - name: login_url
-          - name: redirect_url
-          - name: base_image
-      script:
-        image: "{{inputs.parameters.base_image}}"
-        volumeMounts:
-          - name: llm-training-vol
-            mountPath: "usr/local/sourcefiles"
-        workingDir: "/usr/local"
-        command: [bash]
-        source: |
-          SCP_PEM_PATH="{{inputs.parameters.pem_file}}" \
-          USER="{{inputs.parameters.user}}" \
-          HOST="{{inputs.parameters.host}}" \
-          SHARED_PATH="{{inputs.parameters.shared_path}}" \
-          GIT_REPO="{{inputs.parameters.git_repo}}" \
-          GIT_REPO_BRANCH="{{inputs.parameters.git_repo_branch}}" \
-          MLPIPELINE_GIT_REPO="{{inputs.parameters.mlpipeline_git_repo}}" \
-          PYFUNC_VENDOR_URI="{{inputs.parameters.pyfunction_vendored_dependencies_uri}}" \
-          NAMESPACE="{{inputs.parameters.inference_namespace}}" \
-          "{{inputs.parameters.shell_script}}"
+          - name: mlflow_entry
+          - name: mlflow_stage
+          - name: git_repo
+            value: #@ data.values.git_repo
+          - name: experiment_name
+            value: #@ data.values.experiment_name
+          - name: environment_name
+            value: #@ data.values.environment_name
+        container:
+          image: oawofolu/llm-image-processor
+          command: [ python ]
+          args:
+            - ./app/main.py
+            - mlflow_entry="{{inputs.parameters.mlflow_entry}}"
+            - mlflow_stage="{{inputs.parameters.mlflow_stage}}"
+            - git_repo="{{inputs.parameters.git_repo}}"
+            - experiment_name="{{inputs.parameters.experiment_name}}"
+            - environment_name="{{inputs.parameters.environment_name}}"

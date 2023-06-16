@@ -170,7 +170,7 @@ kapp delete -a huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -y -nargo
 * Deploy the app:
 ```
 source .env
-envsubst < resources/tapworkloads/workload.in.yaml > config/workload.yaml
+envsubst < resources/tapworkloads/workload.in.yaml > resources/tapworkloads/workload.yaml
 tanzu apps workload create llm-demo -f resources/tapworkloads/workload.yaml --yes
 ```
 

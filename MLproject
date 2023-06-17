@@ -4,7 +4,7 @@ entry_points:
   publish_model:
     parameters:
         repo-name: {default: "question-answering-finetuned"}
-    command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{repo-name}\")" >> /tmp/app.log 2>&1'
+    command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{repo-name}\")"'
 
   send_metadata:
     parameters:
@@ -13,9 +13,9 @@ entry_points:
         env: {default: "DEV"}
         gms-server: {default: "http://datahub-datahub.tanzumlai.com"}
         model-description: {default: "Fine-tuned DistilBERT model"}
-    command: '$(which python3) -c "from app.analytics import model_customization; import os; model_customization.send_metadata(\"{model-name}\",\"{platform}\",\"{env}\",\"{gms-server}\",\"{model-description}\")" >> /tmp/app.log 2>&1'
+    command: '$(which python3) -c "from app.analytics import model_customization; import os; model_customization.send_metadata(\"{model-name}\",\"{platform}\",\"{env}\",\"{gms-server}\",\"{model-description}\")"'
 
   promote_model_to_staging:
       parameters:
           model-name: {default: "tanzuhuggingface/question-answering-finetuned"}
-      command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{model-name}\")" >> /tmp/app.log 2>&1'
+      command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{model-name}\")"'

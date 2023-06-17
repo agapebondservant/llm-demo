@@ -43,6 +43,7 @@ spec:
         parameters:
           - name: mlflow_entry
           - name: mlflow_stage
+            value: "Staging"
           - name: git_repo
             value: #@ data.values.git_repo
           - name: experiment_name

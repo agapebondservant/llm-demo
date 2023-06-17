@@ -4,7 +4,8 @@ entry_points:
   publish_model:
     parameters:
         repo-name: {default: "question-answering-finetuned"}
-    command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{repo-name}\")"'
+        pretrained-model-name: {default: "distilbert-base-cased-distilled-squad"}
+    command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{repo-name}\", \"{pretrained-model-name}\")"'
 
   send_metadata:
     parameters:
@@ -18,4 +19,5 @@ entry_points:
   promote_model_to_staging:
       parameters:
           model-name: {default: "tanzuhuggingface/question-answering-finetuned"}
-      command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{model-name}\")"'
+          pipeline-name: {default: "question-answering"}
+      command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{model-name}\",\"{pipeline-name}\")"'

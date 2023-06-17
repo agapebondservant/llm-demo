@@ -21,31 +21,48 @@ data:
 
     CREATE OR REPLACE FUNCTION ${XYZSCHEMA}.run_loader_task(
        url varchar(1000),
-       token text)
-    RETURNS void AS
-    $$
+       data text,
+       chunk_size smallint,
+       chunk_overlap smallint)
+    RETURNS INT AS
+    '
+    DECLARE
+    return_count int;
     BEGIN
+       WITH tokens AS (
+          SELECT chunk_index, chunk
+          FROM pgml.chunk(
+            ''recursive_character'',
+            data,
+            json_build_object(''chunk_size'',chunk_size,''chunk_overlap'',chunk_overlap)::JSONB
+          )
+       )
        INSERT INTO ${XYZSCHEMA}.vmware_doc_scrape_metadata(url, token)
-       VALUES(url, token);
+       SELECT url, chunk from tokens;
+       GET DIAGNOSTICS return_count := ROW_COUNT;
+       RETURN return_count;
     END
-    $$
+    '
     LANGUAGE plpgsql;
 
     CREATE OR REPLACE FUNCTION ${XYZSCHEMA}.distilbert_embed_token()
     RETURNS TRIGGER
     AS
-    $$
+    '
     BEGIN
-        NEW.e5_large_token_embedding := pgml.embed('distilbert-base-uncased',NEW.token);
+        NEW.e5_large_token_embedding := pgml.embed(''distilbert-base-uncased'',NEW.token);
     	RETURN NEW;
     END
-    $$
+    '
     LANGUAGE PLPGSQL;
 
-    CREATE TRIGGER distilbert_embed_token_trigger
+    CREATE OR REPLACE TRIGGER distilbert_embed_token_trigger
     BEFORE INSERT OR UPDATE ON ${XYZSCHEMA}.vmware_doc_scrape_metadata
     FOR EACH ROW
     EXECUTE PROCEDURE ${XYZSCHEMA}.distilbert_embed_token();
+
+    ALTER TABLE ${XYZSCHEMA}.vmware_doc_scrape_metadata
+    DISABLE TRIGGER distilbert_embed_token_trigger;
 ---
 apiVersion: batch/v1
 kind: Job

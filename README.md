@@ -85,8 +85,8 @@ resources/scripts/delete-postgresml-cluster.sh
 source .env
 export DATA_E2E_LIQUIBASE_TRAINING_DB_URI=postgresql://postgresml-bitnami-postgresql.${DATA_E2E_POSTGRESML_NS}.svc.cluster.local:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE};sslmode=allow \
 XYZSCHEMA=public XYZCHANGESETID=`echo $(date '+%Y%m%d%H%M%s')` \
-envsubst < resources/liquibase/setup.in.yaml > resources/liquibase/setup.yaml
-kubectl apply -f resources/liquibase/setup.yaml -n ${DATA_E2E_POSTGRESML_NS}
+envsubst < resources/db/liquibase/setup.in.yaml > resources/db/liquibase/setup.yaml
+kubectl apply -f resources/db/liquibase/setup.yaml -n ${DATA_E2E_POSTGRESML_NS}
 ```
 
 2. Verify that the migration job ran without errors:

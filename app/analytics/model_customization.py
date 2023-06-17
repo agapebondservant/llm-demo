@@ -5,10 +5,10 @@ from datahub.emitter.rest_emitter import DatahubRestEmitter
 from huggingface_hub import ModelCard
 from transformers import DistilBertTokenizer, TFDistilBertForQuestionAnswering
 from dotenv import load_dotenv
-import sys
 import os
 import mlflow
 from mlflow import MlflowClient
+from transformers import pipeline
 
 load_dotenv()
 
@@ -44,30 +44,36 @@ def ingest_metadata_from_huggingface_model(model_name: str):
     return card or {}
 
 
-def publish_model(repo_name: str):
+def publish_model(repo_name: str, pretrained_model_name: str):
     with mlflow.start_run(run_name='publish_model', nested=True):
         # TODO: DO NOT HARDCODE!!!
         clone_url = (f"https://tanzuhuggingface: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@huggingface.co/"
                      f"tanzuhuggingface/{repo_name}")
 
-        os.system(f"git clone {clone_url}; cd {repo_name}; git lfs install; huggingface-cli lfs-enable-largefiles .")
+        os.system(f"git clone {clone_url}; "
+                  f"cd {repo_name};"
+                  f" git lfs install; "
+                  f"huggingface-cli lfs-enable-largefiles .")
 
         model_name = f"tanzuhuggingface/{repo_name}"
 
         print(f"=====================\nSaving model {model_name}...\n=====================\n")
 
-        model = DistilBertTokenizer.from_pretrained("distilbert-base-cased-distilled-squad")
-        tokenizer = TFDistilBertForQuestionAnswering.from_pretrained("distilbert-base-cased-distilled-squad")
-        model.save_pretrained("distilbert-base-cased-distilled-squad")
-        tokenizer.save_pretrained("distilbert-base-cased-distilled-squad")
+        model = DistilBertTokenizer.from_pretrained(pretrained_model_name)
+        tokenizer = TFDistilBertForQuestionAnswering.from_pretrained(pretrained_model_name)
+        model.save_pretrained(pretrained_model_name)
+        tokenizer.save_pretrained(pretrained_model_name)
 
-        os.system(f"cd {repo_name}; mv ../distilbert-base-cased-distilled-squad/* .;"
-                  "rm -rf ../distilbert-base-cased-distilled-squad; git add .;"
+        os.system(f"cd {repo_name}; "
+                  f"mv ../{pretrained_model_name}/* .;"
+                  f"rm -rf ../{pretrained_model_name}; "
+                  "git add .;"
                   "git commit -m 'Uploaded pretrained model';"
-                  f"git push; cd -; rm -rf {repo_name}")
+                  f"git push; "
+                  f"cd -; rm -rf {repo_name}")
 
 
-def promote_model_to_staging(model_name):
+def promote_model_to_staging(model_name, pipeline_name):
     client = MlflowClient(model_name)
 
     # TODO: Determine correct version
@@ -77,3 +83,9 @@ def promote_model_to_staging(model_name):
             version=1,
             stage="Staging"
         )
+
+    qa_pipe = pipeline(pipeline_name, model_name)
+    mlflow.transformers.log_model(
+        transformers_model=qa_pipe,
+        artifact_path=pipeline_name,
+    )

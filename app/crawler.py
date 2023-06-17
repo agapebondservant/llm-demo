@@ -75,12 +75,12 @@ def scrape_url(base_url_path: str, redirect_url_path: str, experiment_name='scra
     WebDriverWait(driver, timeout=120, poll_frequency=5).until(EC.url_contains("onevmw"))
 
     driver.get(redirect_url_path)
-    links = find_and_download_pdf_links(base_url_path, 'docs')
+    links, files = find_and_download_pdf_links(base_url_path, 'docs')
 
-    for link in links:
-        logger.info(f"Extracting text from pdf files...{link}")
-        extracted_text = extract_text_from_pdf(link)
-        data_loader.store_tokens(link, extracted_text, experiment_name)
+    for idx, file in enumerate(files):
+        logger.info(f"Extracting text from pdf files...{file}")
+        extracted_text = extract_text_from_pdf(file)
+        data_loader.store_tokens(links[idx], extracted_text, experiment_name)
 
     driver.quit()
     return links is not None
@@ -109,9 +109,9 @@ def find_and_download_pdf_links(base_url_path: str, download_path: str):
         doc_name = _get_pdf_from_url(pdf, download_path)
         docs.append(doc_name)
 
-    logger.debug(f"Docs : {docs}")
+    logger.debug(f"Docs : {docs}\nLinks: {pdfs}")
 
-    return docs
+    return pdfs, docs
 
 
 def _get_pdf_from_url(url_path: str, download_path: str):

@@ -2,7 +2,7 @@ docs
 .env
 dev/
 *.h5
-resources/liquibase/setup.yaml
+resources/db/liquibase/setup.yaml
 resources/argo/values.yaml
 resources/argo/pipeline*.yaml
 pdfs

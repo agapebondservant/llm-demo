@@ -9,6 +9,7 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 st.write("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nanum Gothic');
+@import url('https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css');
 html, body, [class*="css"]{
    font-family: 'Nanum Gothic';
 }
@@ -35,6 +36,10 @@ span.metriclabel{
     opacity: 0;
   }
 }
+
+.fa-thumbs-up:hover, .fa-thumbs-down:hover {
+    color: orange;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -48,7 +53,11 @@ tab1, tab2 = st.tabs(["Text Summarization", "AI Bot"])
 with tab1:
     uploaded_file = st.file_uploader("Select a PDF file to summarize", key="upl_cifar")
     if uploaded_file is not None:
-        st.markdown(f"<br/>F-1 metric:<br/> <span class='metriclabel'>File uploaded</span>",
+        st.markdown(f"<br/>Status:<br/> <span class='metriclabel'>File uploaded</span>"
+                    "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                    "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
+                    "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                    "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>",
                     unsafe_allow_html=True)
 
 # AIBot
@@ -60,7 +69,12 @@ with tab2:
 
     with st.spinner('Querying local data...'):
         st.markdown(
-            f"Response:<br/><span style=font-size:1.2em;>{question}</span>",
+            f"Response:<br/><span style=font-size:1.2em;>{question}</span>"
+            "<br/>Status:<br/> <span class='metriclabel'>File uploaded</span>"
+            "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+            "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
+            "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+            "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>",
             unsafe_allow_html=True)
 
 # Refresh the screen at a configured interval

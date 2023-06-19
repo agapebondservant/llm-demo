@@ -60,9 +60,6 @@ data:
     BEFORE INSERT OR UPDATE ON ${XYZSCHEMA}.vmware_doc_scrape_metadata
     FOR EACH ROW
     EXECUTE PROCEDURE ${XYZSCHEMA}.distilbert_embed_token();
-
-    ALTER TABLE ${XYZSCHEMA}.vmware_doc_scrape_metadata
-    DISABLE TRIGGER distilbert_embed_token_trigger;
 ---
 apiVersion: batch/v1
 kind: Job

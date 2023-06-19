@@ -12,6 +12,7 @@ image:
   repository: ${DATA_E2E_LLM_REGISTRY_USERNAME}/postgresml-bitnami
   tag: ${DATA_E2E_POSTGRESML_IMAGE_TAG}
   debug: true
+  # pullPolicy: Always
 
 primary:
   extendedConfiguration: |
@@ -33,13 +34,15 @@ primary:
       00_init_extensions.sh: |-
         #/bin/bash
         echo "Setting huggingface cache directory..."
-        mkdir -p /opt/cache/huggingface/transformers
-        chmod -R 766 /opt/cache/huggingface
         ls -ltra /opt/cache
 
   extraEnvVars:
     - name: HF_HOME
       value: /opt/cache
+    - name: TRANSFORMERS_CACHE
+      value: /opt/cache/hub
+    - name: TORCH_HOME
+      value: /opt/cache/torch
 
   podSecurityContext:
     enabled: true

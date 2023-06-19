@@ -32,8 +32,8 @@ RUN apt-get install -y --no-install-recommends bison build-essential clang flex 
     && git clone https://github.com/postgresml/postgresml \
     && cd postgresml \
     && git submodule update --init --recursive && cd pgml-extension \
-    && pip3 install -r requirements.txt
-
+    && pip3 install -r requirements.txt \
+    && pip3 install xformers=0.0.20 --no-dependencies
 # core
 RUN cd /tmp/postgresml/pgml-extension \
     && ~/.cargo/bin/cargo install cargo-pgrx --version "0.9.2" --locked \

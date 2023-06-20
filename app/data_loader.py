@@ -24,15 +24,18 @@ def store_tokens(url_path: str, text: str, experiment_name: str, chunk_size: int
     """
     try:
 
-        logger.info(f"Storing data for {url_path}...")
+        logger.info(f"Storing data for: {url_path}...")
         ####################
         # Store to database
         ###################
 
         # GreenplumPython
         db = greenplumpython.database(uri=os.getenv('DATA_E2E_LLMAPP_TRAINING_DB_URI'))
-        logger.info(os.getenv('DATA_E2E_LLMAPP_TRAINING_DB_URI'))
-        loader_function_name = 'run_loader_task'
+        loader_function_name, backfill_function_name = 'run_loader_task', 'backfill_embeddings'
+
+        ########################################
+        # Invoke loader function
+        ########################################
         loader_function = greenplumpython.function(loader_function_name,
                                                    schema=os.getenv('DATA_E2E_LLMAPP_TRAINING_DB_SCHEMA'))
 
@@ -54,7 +57,7 @@ def store_tokens(url_path: str, text: str, experiment_name: str, chunk_size: int
             )
             os.environ['MLFLOW_EXPERIMENT_NAME'] = experiment_name
             mlflow.set_tags({"embeddable_docs": "y"})
-            mlflow.log_text(url_path, f"{num_tokens}")
+            mlflow.log_dict({url_path: num_tokens}, 'data')
 
     except Exception as ee:
         logger.info("An Exception occurred...", exc_info=True)

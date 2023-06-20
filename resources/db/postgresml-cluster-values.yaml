@@ -17,6 +17,9 @@ image:
 primary:
   extendedConfiguration: |
     shared_preload_libraries = 'pgml,vector,pgaudit,pg_stat_statements'
+    tcp_keepalives_idle = 30
+    tcp_keepalives_interval = 10
+    tcp_keepalives_count = 5
 
   extraVolumes:
   - name: cache-dir

@@ -43,7 +43,7 @@ export DATA_E2E_LLMAPP_TRAINING_DB_URI=postgresql://postgres:${DATA_E2E_BITNAMI_
 LLM_DEMO_EMAIL=oawofolu@vmware.com \
 BASE_URL='https://onevmw.sharepoint.com' \
 FINAL_URL='https://onevmw.sharepoint.com/:f:/r/teams/TSL-v20/Shared%20Documents/Tanzu%20AI%20-%20ML/Demos/LLM%20Demo/docs?csf=1&web=1&e=m67rNF' \
-$(which python3) -c "import os; from app import crawler; crawler.scrape_url(base_url_path=os.environ['BASE_URL'], redirect_url_path=os.environ['FINAL_URL'])"
+$(which python3) -c "import os; from app import crawler; crawler.scrape_url(base_url_path=os.environ['BASE_URL'], redirect_url_path=os.environ['FINAL_URL'], experiment_name='scraper12333')"
 ```         
 
 ### Deploy Bitnami Postgres on Kubernetes<a name="pg4k8s"/>

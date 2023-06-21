@@ -7,3 +7,4 @@ resources/argo/values.yaml
 resources/argo/pipeline*.yaml
 pdfs
 tmp.py
+resources/db/liquibase/embeddings.yaml

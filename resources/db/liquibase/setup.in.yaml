@@ -44,26 +44,6 @@ data:
     END
     '
     LANGUAGE plpgsql;
-
-    CREATE OR REPLACE FUNCTION ${XYZSCHEMA}.backfill_embeddings()
-    RETURNS text
-    AS
-    '
-    DECLARE
-    min_id integer;
-    max_id integer;
-    BEGIN
-      SELECT min(id), max(id) FROM ${XYZSCHEMA}.vmware_doc_scrape_metadata INTO min_id, max_id;
-      FOR i in min_id..max_id by 10 LOOP
-        UPDATE ${XYZSCHEMA}.vmware_doc_scrape_metadata
-        SET e5_large_token_embedding = pgml.embed(''intfloat/e5-large'', ''passage: '' || token)
-        WHERE id BETWEEN i AND i + 10
-            AND e5_large_token_embedding IS NULL;
-      END LOOP;
-      RETURN ''done'';
-    END
-    '
-    LANGUAGE plpgsql;
 ---
 apiVersion: batch/v1
 kind: Job

@@ -6,9 +6,10 @@
 3. [Set up web crawler](#crawler)
 4. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
 5. [Set up Training and Test Dbs](#traintestdbs)
-6. [Set up HuggingFace model repo](#huggingfacerepo)
-7. [Integrate HuggingFace model with DataHub](#datahub)
-8. [Deploy Demo app](#demoapp)
+6. [Generate embeddings](#embeddings)
+7. [Set up HuggingFace model repo](#huggingfacerepo)
+8. [Integrate HuggingFace model with DataHub](#datahub)
+9. [Deploy Demo app](#demoapp)
 
 ### Install required Python libraries<a name="pythonlib"/>
 Install required Python libraries:
@@ -97,6 +98,21 @@ kubectl logs job/liquibase -n ${DATA_E2E_POSTGRESML_NS}
 3. Verify that the new data schemas were loaded:
 ```
 kubectl exec -it postgresml-bitnami-postgresql-0 -n ${DATA_E2E_POSTGRESML_NS} -- psql postgresql://postgres:${DATA_E2E_BITNAMI_AUTH_PASSWORD}@localhost:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE}?sslmode=allow -c "SELECT id, filename, dateexecuted, orderexecuted from public.databasechangelog"
+```
+
+### Generate embeddings<a name="embeddings"/>
+1. Run the following to generate embeddings from the loaded data:
+```
+source .env
+export DATA_E2E_LIQUIBASE_TRAINING_DB_URI=postgresql://postgres:${DATA_E2E_BITNAMI_AUTH_PASSWORD}@postgresml-bitnami-postgresql.${DATA_E2E_POSTGRESML_NS}.svc.cluster.local:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE};sslmode=allow \
+XYZSCHEMA=public XYZCHANGESETID=`echo $(date '+%Y%m%d%H%M%s')` \
+envsubst < resources/db/liquibase/embeddings.in.yaml > resources/db/liquibase/embeddings.yaml
+kubectl apply -f resources/db/liquibase/embeddings.yaml -n ${DATA_E2E_POSTGRESML_NS}
+```
+
+2. Verify that the job runs without errors (NOTE - this job may take a while to complete):
+```
+kubectl logs job/embeddings -n ${DATA_E2E_POSTGRESML_NS} --follow
 ```
 
 ### Set up HuggingFace model repo<a name="huggingfacerepo"/>

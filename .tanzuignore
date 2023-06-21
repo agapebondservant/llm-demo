@@ -3,4 +3,5 @@ config/
 docs
 resources
 tmp*.*
-test.sql
+test.sqlresources/tapworkloads/workload.yaml
+resources/db/liquibase/embeddings.yaml

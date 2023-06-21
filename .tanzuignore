@@ -5,3 +5,4 @@ resources
 tmp*.*
 test.sqlresources/tapworkloads/workload.yaml
 resources/db/liquibase/embeddings.yaml
+resources/tapworkloads/workload.yaml

@@ -6,5 +6,6 @@ resources/db/liquibase/setup.yaml
 resources/argo/values.yaml
 resources/argo/pipeline*.yaml
 pdfs
-tmp.py
+tmp*.*
+test.sql
 resources/db/liquibase/embeddings.yaml

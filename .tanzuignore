@@ -2,3 +2,5 @@ config/
 .env
 docs
 resources
+tmp*.*
+test.sql

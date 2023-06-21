@@ -2,6 +2,8 @@ import streamlit as st
 from PIL import Image
 from streamlit_autorefresh import st_autorefresh
 import logging
+from app.anaytics import llm
+import streamlit as st
 
 # Initializations
 st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -65,17 +67,18 @@ with tab2:
     st.markdown("This bot uses <b>on-premise data</b> to provide information about VMware technologies.<br/>",
                 unsafe_allow_html=True)
 
-    question = st.text_input('Your question', '''''', key='aibot')  # , on_change=)
-
+    question = st.text_input('Your question', '''''', key='aibot')
     with st.spinner('Querying local data...'):
-        st.markdown(
-            f"Response:<br/><span style=font-size:1.2em;>{question}</span>"
-            "<br/>Status:<br/> <span class='metriclabel'>File uploaded</span>"
-            "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-            "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
-            "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-            "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>",
-            unsafe_allow_html=True)
+        if question:
+            url, results = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123')
+            st.markdown(f"Response:<br/><span style=font-size:1.2em;>{url}</span>"
+                        f"<br/><span style=font-size:1.2em;>{results}</span>"
+                        "<br/>Status:<br/> <span class='metriclabel'>File uploaded</span>"
+                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                        "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
+                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                        "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>",
+                        unsafe_allow_html=True)
 
 # Refresh the screen at a configured interval
 st_autorefresh(interval=15 * 1000, key="anomalyrefresher")

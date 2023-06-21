@@ -16,7 +16,7 @@ data:
       url varchar(1000),
       summary text,
       token text,
-      e5_large_token_embedding VECTOR(1024)
+      e5_large_token_embedding VECTOR(768)
     );
 
     CREATE OR REPLACE FUNCTION ${XYZSCHEMA}.run_loader_task(
@@ -44,6 +44,49 @@ data:
     END
     '
     LANGUAGE plpgsql;
+
+    CREATE OR REPLACE FUNCTION public.run_llm_inference_task(
+           question varchar,
+           task varchar,
+           task_model varchar)
+        RETURNS table (
+            doc_url varchar,
+            result jsonb
+        )
+        AS
+        '
+        BEGIN
+            RETURN QUERY
+            WITH contexts AS (
+                SELECT pgml.embed(''distilbert-base-uncased'', ''query: '' || question)::vector AS context_question
+            ),
+            data AS (
+                SELECT id,
+                token,
+                url,
+                e5_large_token_embedding  AS embedding,
+                1-(context_question <=> e5_large_token_embedding) AS cosine_similarity
+                FROM contexts, vmware_doc_scrape_metadata
+                ORDER BY context_question <=> e5_large_token_embedding
+                LIMIT 3
+            ),
+            summary AS (
+                SELECT vmware_doc_scrape_metadata.url AS summary_url,
+                vmware_doc_scrape_metadata.token AS summary_token
+                FROM vmware_doc_scrape_metadata, data
+                WHERE vmware_doc_scrape_metadata.id >= data.id-5 AND vmware_doc_scrape_metadata.id < data.id+5
+                AND vmware_doc_scrape_metadata.url = data.url
+                ORDER BY vmware_doc_scrape_metadata.id
+            )
+            SELECT summary_url, pgml.transform(
+                task  => jsonb_build_object(''task'',task,''model'',task_model),
+                inputs => ARRAY[string_agg(summary_token,'' '' ) ]
+            ) AS result
+            FROM summary
+            GROUP BY summary_url;
+        END;
+        '
+        LANGUAGE plpgsql;
 ---
 apiVersion: batch/v1
 kind: Job

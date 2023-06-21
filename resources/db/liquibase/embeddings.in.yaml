@@ -7,17 +7,22 @@ data:
   generate_embeddings.sql: |
     DO $$
     BEGIN
-        FOR i in (SELECT coalesce(min(id),0) FROM public.vmware_doc_scrape_metadata where e5_large_token_embedding IS NULL)..
-                 (SELECT coalesce(max(id),0) FROM public.vmware_doc_scrape_metadata where e5_large_token_embedding IS NULL) by 10 LOOP
+        FOR i in (SELECT coalesce(min(id),0) FROM ${XYZSCHEMA}.vmware_doc_scrape_metadata where e5_large_token_embedding IS NULL)..
+                 (SELECT coalesce(max(id),0) FROM ${XYZSCHEMA}.vmware_doc_scrape_metadata where e5_large_token_embedding IS NULL) by 10 LOOP
             BEGIN RAISE NOTICE 'updating % to %', i, i + 10; END;
 
-            UPDATE public.vmware_doc_scrape_metadata
-            SET e5_large_token_embedding = pgml.embed('intfloat/e5-large', 'passage: ' || token)
+            UPDATE ${XYZSCHEMA}.vmware_doc_scrape_metadata
+            SET e5_large_token_embedding = pgml.embed('distilbert-base-uncased', 'passage: ' || token)::vector(768)
             WHERE id BETWEEN i AND i + 10;
             COMMIT;
         END LOOP;
     END;
     $$;
+
+    CREATE INDEX CONCURRENTLY IF NOT EXISTS index_e5_large_token_embedding
+    ON ${XYZSCHEMA}.vmware_doc_scrape_metadata
+    USING ivfflat (e5_large_token_embedding vector_cosine_ops)
+    WITH (lists = 4);
 ---
 apiVersion: batch/v1
 kind: Job

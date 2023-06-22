@@ -41,7 +41,7 @@ def run_task(prompt: str, task: str, model_name: str, experiment_name: str, use_
 
         df = db.apply(lambda: inference_function(prompt, task, model_name, use_topk))
         result = next(iter(df))
-        logger.info(result)
+        logger.info(f"{result} {type(result)}")
         url, answer = result["doc_url"], result["result"]
         logger.info(f"Results:\nurl={url}\nresult={answer} ({type(answer)})")
 

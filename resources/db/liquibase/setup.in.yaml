@@ -45,7 +45,7 @@ data:
     '
     LANGUAGE plpgsql;
 
-    CREATE OR REPLACE FUNCTION public.run_llm_inference_task(
+    CREATE OR REPLACE FUNCTION ${XYZSCHEMA}.run_llm_inference_task(
            question varchar,
            task varchar,
            task_model varchar,

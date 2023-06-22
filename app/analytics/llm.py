@@ -40,7 +40,7 @@ def run_task(prompt: str, task: str, model_name: str, experiment_name: str, use_
                                                       schema=os.getenv('DATA_E2E_LLMAPP_TRAINING_DB_SCHEMA'))
 
         df = db.apply(lambda: inference_function(prompt, task, model_name, use_topk))
-        result = next(iter(df))
+        result = next(iter(df))[inference_function_name]
         logger.info(f"{result} {type(result)}")
         url, answer = result["doc_url"], result["result"]
         logger.info(f"Results:\nurl={url}\nresult={answer} ({type(answer)})")

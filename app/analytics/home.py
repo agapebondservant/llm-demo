@@ -3,7 +3,6 @@ from PIL import Image
 from streamlit_autorefresh import st_autorefresh
 import logging
 from app.anaytics import llm
-import streamlit as st
 
 # Initializations
 st.set_option('deprecation.showPyplotGlobalUse', False)

@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 from streamlit_autorefresh import st_autorefresh
 import logging
-from app.anaytics import llm
+from app.analytics import llm
 
 # Initializations
 st.set_option('deprecation.showPyplotGlobalUse', False)

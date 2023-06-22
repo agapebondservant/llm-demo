@@ -3,6 +3,7 @@ from PIL import Image
 from streamlit_autorefresh import st_autorefresh
 import logging
 from app.analytics import llm
+from io import StringIO
 
 # Initializations
 st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -54,7 +55,12 @@ tab1, tab2 = st.tabs(["Text Summarization", "AI Bot"])
 with tab1:
     uploaded_file = st.file_uploader("Select a PDF file to summarize", key="upl_cifar")
     if uploaded_file is not None:
+        stringio = StringIO(uploaded_file.getvalue().encode('ascii', 'replace').decode())
+        content = stringio.read()
+        url, answer = llm.run_task(content, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123',
+                                   use_topk='n')
         st.markdown(f"<br/>Status:<br/> <span class='metriclabel'>File uploaded</span>"
+                    f"<br/><span style=font-size:1.2em;>{answer}</span>"
                     "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
                     "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
                     "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
@@ -69,9 +75,9 @@ with tab2:
     question = st.text_input('Your question', '''''', key='aibot')
     with st.spinner('Querying local data...'):
         if question:
-            results = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123')
+            url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123')
             st.markdown(f"Response:<br/><span style=font-size:1.2em;>{url}</span>"
-                        f"<br/><span style=font-size:1.2em;>{results}</span>"
+                        f"<br/><span style=font-size:1.2em;>{answer}</span>"
                         "<br/>Status:<br/> <span class='metriclabel'>File uploaded</span>"
                         "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
                         "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
@@ -80,4 +86,4 @@ with tab2:
                         unsafe_allow_html=True)
 
 # Refresh the screen at a configured interval
-st_autorefresh(interval=15 * 1000, key="anomalyrefresher")
+# st_autorefresh(interval=15 * 1000, key="anomalyrefresher")

@@ -12,13 +12,14 @@ logger.setLevel(logging.INFO)
 load_dotenv()
 
 
-def run_task(prompt: str, task: str, model_name: str, experiment_name: str):
+def run_task(prompt: str, task: str, model_name: str, experiment_name: str, use_topk: bool = 'y'):
     """
     Runs a HuggingFace inference pipeline.
     :param prompt: Prompt text to be submitted to the transformers pipeline
     :param task: Pipeline task to be implemented
     :param model_name: Name of HuggingFace model
     :param experiment_name: Mlflow experiment to associate with this task
+    :param use_topk: Flag indicating whether or not to use top-k semantic search to filter content
     :return:
     """
     try:
@@ -40,9 +41,8 @@ def run_task(prompt: str, task: str, model_name: str, experiment_name: str):
 
         df = db.apply(lambda: inference_function(prompt, task, model_name))
         result = next(iter(df))
-        # url, answer = result["summary_url"], result["result"]
-        # logger.info(f"Results:\nurl={url}\nresult={answer} ({type(answer)})")
-        logger.info(result)
+        url, answer = result["doc_url"], result["result"]
+        logger.info(f"Results:\nurl={url}\nresult={answer} ({type(answer)})")
 
         ####################
         # Log token in Mlflow
@@ -57,7 +57,7 @@ def run_task(prompt: str, task: str, model_name: str, experiment_name: str):
             mlflow.set_tags({"embeddable_docs": "y"})
             mlflow.log_dict({url_path: num_tokens}, 'data')
         """
-        return result
+        return url, answer
 
     except Exception as ee:
         logger.info("An Exception occurred...", exc_info=True)

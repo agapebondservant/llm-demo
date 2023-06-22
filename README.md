@@ -43,7 +43,7 @@ export LB_ENDPOINT=$(kubectl get svc postgresml-bitnami-postgresql -n ${DATA_E2E
 export DATA_E2E_LLMAPP_TRAINING_DB_URI=postgresql://postgres:${DATA_E2E_BITNAMI_AUTH_PASSWORD}@${LB_ENDPOINT}:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE};sslmode=allow;
 LLM_DEMO_EMAIL=oawofolu@vmware.com \
 BASE_URL='https://onevmw.sharepoint.com' \
-FINAL_URL='https://onevmw.sharepoint.com/teams/TSL-v20/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=vO5tcd&cid=1704b3d3%2D21cc%2D4b67%2D80d8%2D6bf147324bdd&FolderCTID=0x012000911523AACDC2974EBB5CA5903B94B0BE&id=%2Fteams%2FTSL%2Dv20%2FShared%20Documents%2FTanzu%20AI%20%2D%20ML%2FResources%2FDemos%2FLLM%20Demo%2Fdocs&viewid=8bc0875b%2D453e%2D4416%2Da640%2D697e4145ced2' \
+FINAL_URL='https://onevmw.sharepoint.com/:f:/r/teams/TSL-v20/Shared%20Documents/Tanzu%20AI%20-%20ML/Resources/Demos/LLM%20Demo/docs' \
 $(which python3) -c "import os; from app import crawler; crawler.scrape_url(base_url_path=os.environ['BASE_URL'], redirect_url_path=os.environ['FINAL_URL'], experiment_name='scraper12333')"
 ```         
 

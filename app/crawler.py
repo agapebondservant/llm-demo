@@ -75,7 +75,7 @@ def scrape_url(base_url_path: str, redirect_url_path: str, experiment_name='scra
     WebDriverWait(driver, timeout=120, poll_frequency=5).until(EC.url_contains("onevmw"))
 
     driver.get(redirect_url_path)
-    links, files = find_and_download_pdf_links(base_url_path, 'docs')
+    links, files = find_and_download_pdf_links(base_url_path, redirect_url_path, 'docs')
 
     for idx, file in enumerate(files):
         logger.info(f"Extracting text from pdf files...{file}")
@@ -86,24 +86,20 @@ def scrape_url(base_url_path: str, redirect_url_path: str, experiment_name='scra
     return links is not None
 
 
-def find_and_download_pdf_links(base_url_path: str, download_path: str):
+def find_and_download_pdf_links(base_url_path: str, redirect_url_path: str, download_path: str):
     """
     Searches for all pdf links in the provided Sharepoint URL
     :param base_url_path: Base domain of the Sharepoint folder to search (ex. http://onevmw.sharepoint.com)
+    :param redirect_url_path: Full URL of the Sharepoint folder to scrape
     :param download_path: Local target directory where files will be downloaded to
     :return: List of downloaded pdf files
     """
-    scripts = driver.find_elements(By.XPATH, '//script[type=text/javascript]')
-
-    for script in scripts:
-        driver.execute_script('arguments[0].innerHTML', script)
-
-    result = yaml.load(str(driver.execute_script('return g_listData')))
-    logger.debug(yaml.dump(result))
-
-    pdfs = [f"{base_url_path}{quote(row['FileRef'])}" for row in result['ListData']['Row'] if
-            row['File_x0020_Type'] == 'pdf']
-    docs = []
+    pdfs, docs = [], []
+    WebDriverWait(driver, timeout=120, poll_frequency=5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "button[data-automationid=FieldRenderer-name]")))
+    tags = driver.find_elements(By.CSS_SELECTOR, "button[data-automationid=FieldRenderer-name]")
+    for tag in tags:
+        logger.info(f"{redirect_url_path}/{tag.get_attribute('innerText')}")
+        pdfs.append(f"{redirect_url_path}/{tag.get_attribute('innerText')}")
 
     for pdf in pdfs:
         doc_name = _get_pdf_from_url(pdf, download_path)

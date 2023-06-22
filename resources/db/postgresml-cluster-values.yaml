@@ -57,3 +57,5 @@ primary:
 
   service:
     type: LoadBalancer
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: '3600'

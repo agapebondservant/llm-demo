@@ -40,8 +40,9 @@ def run_task(prompt: str, task: str, model_name: str, experiment_name: str):
 
         df = db.apply(lambda: inference_function(prompt, task, model_name))
         result = next(iter(df))
-        url, answer = result["summary_url"], result["result"]
-        logger.info(f"Results:\nurl={url}\nresult={answer} ({type(answer)})")
+        # url, answer = result["summary_url"], result["result"]
+        # logger.info(f"Results:\nurl={url}\nresult={answer} ({type(answer)})")
+        logger.info(result)
 
         ####################
         # Log token in Mlflow
@@ -56,7 +57,7 @@ def run_task(prompt: str, task: str, model_name: str, experiment_name: str):
             mlflow.set_tags({"embeddable_docs": "y"})
             mlflow.log_dict({url_path: num_tokens}, 'data')
         """
-        return url, answer
+        return result
 
     except Exception as ee:
         logger.info("An Exception occurred...", exc_info=True)

@@ -69,7 +69,7 @@ with tab2:
     question = st.text_input('Your question', '''''', key='aibot')
     with st.spinner('Querying local data...'):
         if question:
-            url, results = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123')
+            results = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123')
             st.markdown(f"Response:<br/><span style=font-size:1.2em;>{url}</span>"
                         f"<br/><span style=font-size:1.2em;>{results}</span>"
                         "<br/>Status:<br/> <span class='metriclabel'>File uploaded</span>"

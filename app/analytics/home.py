@@ -81,10 +81,10 @@ with tab2:
     with st.spinner('Querying local data...'):
         if question:
             url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123')
-            st.markdown(f"Response:<br/><span style=font-size:1em;><a href=\"{url}\">Matched Document Link</a></span>"
-                        f"<br/><span style='font-size:1.2em;' class=predictedlabel>{answer}</span>"
-                        f"<br/>Model Name:<br/> <span class='predictedlabel'>tanzuhuggingface/dev</span>"
-                        "<br/>Status:<br/> <span class='metriclabel'>Rank answer</span>"
+            st.markdown(f"<b>Response:</b><br/><span style=font-size:1em;><a href=\"{url}\">Matched Document Link</a></span>"
+                        f"<br/><br/><span style='font-size:1.2em;' class=predictedlabel>{answer}</span>"
+                        f"<br/><br/><b>Model Name:</b><br/> <span class='predictedlabel'>tanzuhuggingface/dev</span>"
+                        "<br/><br/> <span class='metriclabel'>Rank answer</span>"
                         "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
                         "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
                         "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
@@ -92,4 +92,4 @@ with tab2:
                         unsafe_allow_html=True)
 
 # Refresh the screen at a configured interval
-# st_autorefresh(interval=15 * 1000, key="anomalyrefresher")
+st_autorefresh(interval=60 * 15 * 1000, key="anomalyrefresher")

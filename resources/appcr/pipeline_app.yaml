@@ -13,7 +13,6 @@ spec:
     - ytt:
         paths:
           - resources/appcr/pipeline.yaml
-          - resources/appcr/pipeline_configmap.yaml
           - resources/appcr/values.yaml
 
   deploy:

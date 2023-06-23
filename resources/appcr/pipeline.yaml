@@ -4,13 +4,13 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   name: llm-image-processing-workflow
+spec:
+  entrypoint: train
   volumes:
     - name: huggingface-repo-volume
       configMap:
         name: llm-pipeline-configmap
         defaultMode: 0777
-spec:
-  entrypoint: train
   templates:
     - name: train
       steps:

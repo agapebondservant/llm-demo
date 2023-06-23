@@ -9,7 +9,8 @@
 6. [Generate embeddings](#embeddings)
 7. [Set up HuggingFace model repo](#huggingfacerepo)
 8. [Integrate HuggingFace model with DataHub](#datahub)
-9. [Deploy Demo app](#demoapp)
+9. [Set up Other Argo Pipelines](#argopipelines)
+10. [Deploy Demo app](#demoapp)
 
 ### Install required Python libraries<a name="pythonlib"/>
 Install required Python libraries:
@@ -169,6 +170,8 @@ kubectl -n argo exec $(kubectl get pod -n argo -l 'app=argo-server' -o jsonpath=
 
 3. Set up GitOps sync hook with kappcontroller's App CR:
 ```
+source .env
+envsubst < resources/appcr/pipeline_configmap.in.yaml > resources/appcr/pipeline_configmap.yaml
 kapp deploy -a huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -f resources/appcr/pipeline_app.yaml --logs -y  -nargo
 ```
 
@@ -180,6 +183,53 @@ kubectl get app huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -oyaml  
 * To delete the pipeline:
 ```
 kapp delete -a huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -y -nargo
+```
+
+### Set up other Argo Pipelines<a name="argopipelines"/>
+1. Set up embeddings pipeline:
+```
+source .env
+envsubst < resources/appcr/pipeline_configmap.in.yaml > resources/appcr/pipeline_configmap.yaml
+kubectl delete -f resources/appcr/pipeline_configmap.yaml -n argo
+kubectl apply -f resources/appcr/pipeline_configmap.yaml -n argo
+kubectl delete -f resources/appcr/pipeline_embeddings.yaml -n argo
+kubectl apply -f resources/appcr/pipeline_embeddings.yaml -n argo
+```
+
+2. View progress (NOTE: can also view progress in Argo UI):
+```
+watch kubectl get pods -n argo
+```
+
+3. Delete the pipeline:
+```
+kubectl delete -f resources/appcr/pipeline_embeddings.yaml -n argo
+```
+
+4. Build Docker image for huggingface setup pipeline (one-time task: only required if it has not already been pre-built):
+```
+source .env
+cd resources/huggingface
+echo -e ${DATA_E2E_LLM_REGISTRY_PASSWORD} | docker login -u ${DATA_E2E_LLM_REGISTRY_USERNAME} --password-stdin
+docker build -t ${DATA_E2E_LLM_REGISTRY_USERNAME}/hugging-face-cli:latest .
+docker push ${DATA_E2E_LLM_REGISTRY_USERNAME}/hugging-face-cli:latest
+cd -
+```
+
+5. Set up huggingface setup pipeline: (after updating `huggingface_repo` in the `resources/appcr/values.yaml` file as appropriate):
+```
+ytt -f resources/appcr/pipeline_create_huggingfacerepo.yaml -f resources/appcr/values-other.yaml | kubectl delete -n argo -f -
+ytt -f resources/appcr/pipeline_create_huggingfacerepo.yaml -f resources/appcr/values-other.yaml | kubectl apply -n argo -f -
+```
+
+5. View progress (NOTE: can also view progress in Argo UI):
+```
+watch kubectl get pods -n argo
+```
+
+6. Delete the pipeline:
+```
+ytt -f resources/appcr/pipeline_create_huggingfacerepo.yaml -f resources/appcr/values.yaml | kubectl delete -n argo -f -
 ```
 
 ### Deploy Demo app<a name="demoapp"/>

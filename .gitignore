@@ -10,3 +10,4 @@ tmp*.*
 test.sql
 resources/db/liquibase/embeddings.yaml
 resources/tapworkloads/workload.yaml
+resources/appcr/pipeline_configmap.yaml

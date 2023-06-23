@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: llm-embeddings-workflow
+spec:
+  entrypoint: run-embeddings
+  volumes:
+    - name: embeddings-script-volume
+      configMap:
+        name: llm-pipeline-configmap
+
+  templates:
+    - name: run-embeddings
+      inputs:
+        parameters:
+          - name: training_db_uri
+            valueFrom:
+              configMapKeyRef:
+                name: llm-pipeline-configmap
+                key: postgresml_uri
+      container:
+        image: postgres:15
+        command: [ psql ]
+        args:
+          - "{{inputs.parameters.training_db_uri}}"
+          - --file=/var/lib/postgresql/data/generate_embeddings.sql
+        volumeMounts:
+          - name: embeddings-script-volume
+            mountPath: /var/lib/postgresql/data

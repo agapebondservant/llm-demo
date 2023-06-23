@@ -2,7 +2,7 @@ source .env
 
 huggingface-cli login --token $DATA_E2E_HUGGINGFACE_TOKEN
 
-huggingface-cli repo create dev --type model -y
+huggingface-cli repo create $1 --type model -y
 
 git lfs install
 

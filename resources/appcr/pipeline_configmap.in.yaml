@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llm-pipeline-configmap
+  labels:
+    workflows.argoproj.io/configmap-type: Parameter
+data:
+  llm_token: ${DATA_E2E_HUGGINGFACE_TOKEN}
+  postgresml_uri: ${DATA_E2E_LLMAPP_TRAINING_DB_URI}
+  generate_embeddings.sql: |
+    DO $$
+    BEGIN
+        FOR i in (SELECT coalesce(min(id),0) FROM ${DATA_E2E_LLMAPP_TRAINING_DB_SCHEMA}.vmware_doc_scrape_metadata where e5_large_token_embedding IS NULL)..
+                 (SELECT coalesce(max(id),0) FROM ${DATA_E2E_LLMAPP_TRAINING_DB_SCHEMA}.vmware_doc_scrape_metadata where e5_large_token_embedding IS NULL) by 100 LOOP
+            BEGIN RAISE NOTICE 'updating % to %', i, i + 100; END;
+
+            UPDATE ${DATA_E2E_LLMAPP_TRAINING_DB_SCHEMA}.vmware_doc_scrape_metadata
+            SET e5_large_token_embedding = pgml.embed('distilbert-base-uncased', 'passage: ' || token)::vector(768)
+            WHERE id BETWEEN i AND i + 100;
+            COMMIT;
+        END LOOP;
+    END;
+    $$;
+
+    CREATE INDEX CONCURRENTLY IF NOT EXISTS index_e5_large_token_embedding
+    ON ${DATA_E2E_LLMAPP_TRAINING_DB_SCHEMA}.vmware_doc_scrape_metadata
+    USING ivfflat (e5_large_token_embedding vector_cosine_ops)
+    WITH (lists = 4);
+  create_custom_huggingface_repo.sh: |
+    echo "Creating custom huggingface repo...$1"
+    pip3 install huggingface_hub[cli] transformers --break-system-packages
+    export PATH=/root/.local/bin:${PATH}
+    huggingface-cli login --token $DATA_E2E_HUGGINGFACE_TOKEN
+    huggingface-cli repo create $1 --type model -y
+    git lfs install
+    git clone https://${DATA_E2E_HUGGINGFACE_USERNAME}:${DATA_E2E_HUGGINGFACE_TOKEN}@huggingface.co/${DATA_E2E_HUGGINGFACE_USERNAME}/$1
+    cd $1
+    huggingface-cli lfs-enable-largefiles .
+    wget https://raw.githubusercontent.com/agapebondservant/llm-demo/main/resources/huggingface/README.md
+    git config --global user.email "tanzudemo@example.com"
+    git add README.md
+    git commit -m "Initial commit"
+    git push
+    cd -
+    rm -rf $1

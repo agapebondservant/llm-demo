@@ -4,11 +4,18 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   name: llm-image-processing-workflow
+  volumes:
+    - name: huggingface-repo-volume
+      configMap:
+        name: llm-pipeline-configmap
+        defaultMode: 0777
 spec:
   entrypoint: train
   templates:
     - name: train
       steps:
+        - - name: create-custom-model-repo
+            template: create-repo
         - - name: publish-model
             template: run-training
             arguments:
@@ -50,6 +57,8 @@ spec:
             value: #@ data.values.experiment_name
           - name: environment_name
             value: #@ data.values.environment_name
+          - name: model_repo
+            value: #@ data.values.huggingface_repo
       container:
         image: oawofolu/llm-image-processor
         command: [ python ]
@@ -60,3 +69,18 @@ spec:
           - git_repo="{{inputs.parameters.git_repo}}"
           - experiment_name="{{inputs.parameters.experiment_name}}"
           - environment_name="{{inputs.parameters.environment_name}}"
+    - name: create-repo
+      inputs:
+        parameters:
+          - name: huggingface_repo
+            value: #@ data.values.huggingface_repo
+      container:
+        image: #@ data.values.huggingface_image
+        imagePullPolicy: Always
+        command: [ /bin/sh ]
+        args:
+          - -c
+          - /usr/local/create_custom_huggingface_repo.sh "{{inputs.parameters.huggingface_repo}}"
+        volumeMounts:
+          - name: huggingface-repo-volume
+            mountPath: /usr/local

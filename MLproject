@@ -3,21 +3,21 @@ name: question_answering_deployment_pipeline
 entry_points:
   publish_model:
     parameters:
-        repo-name: {default: "question-answering-finetuned"}
+        model-repo: {default: "question-answering-finetuned"}
         pretrained-model-name: {default: "distilbert-base-cased-distilled-squad"}
-    command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{repo-name}\", \"{pretrained-model-name}\")"'
+    command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{model-repo}\", \"{pretrained-model-name}\")"'
 
   send_metadata:
     parameters:
-        model-name: {default: "tanzuhuggingface/question-answering-finetuned"}
+        model-repo: {default: "question-answering-finetuned"}
         platform: {default: "nlp"}
         env: {default: "DEV"}
         gms-server: {default: "http://datahub-datahub.tanzumlai.com"}
         model-description: {default: "Fine-tuned DistilBERT model"}
-    command: '$(which python3) -c "from app.analytics import model_customization; import os; model_customization.send_metadata(\"{model-name}\",\"{platform}\",\"{env}\",\"{gms-server}\",\"{model-description}\")"'
+    command: '$(which python3) -c "from app.analytics import model_customization; import os; model_customization.send_metadata(\"tanzuhuggingface/{model-repo}\",\"{platform}\",\"{env}\",\"{gms-server}\",\"{model-description}\")"'
 
   promote_model_to_staging:
       parameters:
-          model-name: {default: "tanzuhuggingface/question-answering-finetuned"}
+            model-repo: {default: "question-answering-finetuned"}
           pipeline-name: {default: "question-answering"}
-      command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{model-name}\",\"{pipeline-name}\")"'
+      command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"tanzuhuggingface/{model-repo}\",\"{pipeline-name}\")"'

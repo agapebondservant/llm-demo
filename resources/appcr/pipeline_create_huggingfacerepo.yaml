@@ -1,0 +1,30 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: llm-huggingface-workflow
+spec:
+  entrypoint: create-repo
+  volumes:
+    - name: huggingface-volume
+      configMap:
+        name: llm-pipeline-configmap
+        defaultMode: 0777
+
+  templates:
+    - name: create-repo
+      inputs:
+        parameters:
+          - name: huggingface_repo
+            value: #@ data.values.huggingface_repo
+      container:
+        image: #@ data.values.huggingface_image
+        imagePullPolicy: Always
+        command: [ /bin/sh ]
+        args:
+          - -c
+          - /usr/local/create_custom_huggingface_repo.sh "{{inputs.parameters.huggingface_repo}}"
+        volumeMounts:
+          - name: huggingface-volume
+            mountPath: /usr/local

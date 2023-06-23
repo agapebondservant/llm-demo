@@ -89,3 +89,4 @@ def promote_model_to_staging(model_name, pipeline_name):
         transformers_model=qa_pipe,
         artifact_path=pipeline_name,
     )
+

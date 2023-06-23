@@ -1,5 +1,4 @@
 import logging
-import mlflow
 import traceback
 import greenplumpython
 from dotenv import load_dotenv
@@ -12,7 +11,12 @@ logger.setLevel(logging.INFO)
 load_dotenv()
 
 
-def run_task(prompt: str, task: str, model_name: str, experiment_name: str, use_topk: bool = 'y'):
+def run_task(prompt: str,
+             task: str,
+             model_name: str,
+             experiment_name: str,
+             use_topk: bool = 'y',
+             inference_function_name: str = 'run_llm_inference_task'):
     """
     Runs a HuggingFace inference pipeline.
     :param prompt: Prompt text to be submitted to the transformers pipeline
@@ -20,6 +24,7 @@ def run_task(prompt: str, task: str, model_name: str, experiment_name: str, use_
     :param model_name: Name of HuggingFace model
     :param experiment_name: Mlflow experiment to associate with this task
     :param use_topk: Flag indicating whether or not to use top-k semantic search to filter content
+    :param inference_function_name: Name of inference function to invoke
     :return:
     """
     try:
@@ -31,7 +36,6 @@ def run_task(prompt: str, task: str, model_name: str, experiment_name: str, use_
 
         # GreenplumPython
         db = greenplumpython.database(uri=os.getenv('DATA_E2E_LLMAPP_TRAINING_DB_URI'))
-        inference_function_name = 'run_llm_inference_task'
 
         ########################################
         # Invoke loader function
@@ -45,19 +49,6 @@ def run_task(prompt: str, task: str, model_name: str, experiment_name: str, use_
         url, answer = result["doc_url"], result["result"]
         logger.info(f"Results:\nurl={url}\nresult={answer} ({type(answer)})")
 
-        ####################
-        # Log token in Mlflow
-        ####################
-        """
-        with mlflow.start_run():
-            mlflow.get_experiment_by_name(experiment_name) or mlflow.create_experiment(
-                experiment_name,
-                artifact_location="pdfs",
-            )
-            os.environ['MLFLOW_EXPERIMENT_NAME'] = experiment_name
-            mlflow.set_tags({"embeddable_docs": "y"})
-            mlflow.log_dict({url_path: num_tokens}, 'data')
-        """
         return url, answer
 
     except Exception as ee:

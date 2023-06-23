@@ -80,9 +80,13 @@ with tab2:
     question = st.text_input('Your question', '''''', key='aibot')
     with st.spinner('Querying local data...'):
         if question:
-            url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123')
+            url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary', use_topk='y', inference_function_name='run_semantic_search')
             st.markdown(f"<b>Response:</b><br/><span style=font-size:1em;><a href=\"{url}\">Matched Document Link</a></span>"
-                        f"<br/><br/><span style='font-size:1.2em;' class=predictedlabel>{answer}</span>"
+                        f"<br/><br/><span style='font-size:1.2em;' class=predictedlabel>{answer}</span>",
+                        unsafe_allow_html=True)
+
+            _, summary = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary')
+            st.markdown(f"<br/><b>Summary:</b><span style='font-size:1.2em;' class=predictedlabel>{summary}</span>"
                         f"<br/><br/><b>Model Name:</b><br/> <span class='predictedlabel'>tanzuhuggingface/dev</span>"
                         "<br/><br/> <span class='metriclabel'>Rank answer</span>"
                         "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"

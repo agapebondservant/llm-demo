@@ -96,6 +96,39 @@ data:
         END;
         '
         LANGUAGE plpgsql;
+
+    CREATE OR REPLACE FUNCTION ${XYZSCHEMA}.run_semantic_search(
+           question varchar,
+           task varchar default 'na',
+           task_model varchar default 'na',
+           use_topk boolean default 'y')
+        RETURNS table (
+            doc_url varchar,
+            result varchar
+        )
+        AS
+        '
+        BEGIN
+    		RETURN QUERY
+            WITH contexts AS (
+                SELECT pgml.embed(''distilbert-base-uncased'', ''query: '' || question)::vector AS context_question
+            ),
+            data AS (
+                SELECT id,
+                token,
+                url,
+                e5_large_token_embedding  AS embedding,
+                1-(context_question <=> e5_large_token_embedding) AS cosine_similarity
+                FROM contexts, vmware_doc_scrape_metadata
+                ORDER BY context_question <=> e5_large_token_embedding
+                LIMIT 3
+            )
+            SELECT url, string_agg(token,'' '') AS result
+            FROM data
+            GROUP BY url;
+        END;
+        '
+        LANGUAGE plpgsql;
 ---
 apiVersion: batch/v1
 kind: Job

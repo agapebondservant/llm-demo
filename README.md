@@ -188,6 +188,8 @@ kubectl -n argo exec $(kubectl get pod -n argo -l 'app=argo-server' -o jsonpath=
 ```
 source .env
 envsubst < resources/appcr/pipeline_configmap.in.yaml > resources/appcr/pipeline_configmap.yaml
+kubectl delete -f resources/appcr/pipeline_configmap.yaml -n argo
+kubectl apply -f resources/appcr/pipeline_configmap.yaml -n argo
 kapp deploy -a huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -f resources/appcr/pipeline_app.yaml --logs -y  -nargo
 ```
 

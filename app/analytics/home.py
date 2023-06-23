@@ -39,6 +39,10 @@ span.metriclabel{
   }
 }
 
+.fa-thumbs-up, .fa-thumbs-down {
+    color: blue;
+}
+
 .fa-thumbs-up:hover, .fa-thumbs-down:hover {
     color: orange;
 }
@@ -76,7 +80,7 @@ with tab2:
     with st.spinner('Querying local data...'):
         if question:
             url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123')
-            st.markdown(f"Response:<br/><span style=font-size:1.2em;>{url}</span>"
+            st.markdown(f"Response:<br/><span style=font-size:1em;><a href=\"{url}\">Matched Document Link</a></span>"
                         f"<br/><span style=font-size:1.2em;>{answer}</span>"
                         "<br/>Status:<br/> <span class='metriclabel'>File uploaded</span>"
                         "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"

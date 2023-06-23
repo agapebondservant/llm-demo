@@ -83,6 +83,7 @@ with tab2:
             url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123')
             st.markdown(f"Response:<br/><span style=font-size:1em;><a href=\"{url}\">Matched Document Link</a></span>"
                         f"<br/><span style='font-size:1.2em;' class=predictedlabel>{answer}</span>"
+                        f"<br/>Model Name:<br/> <span class='predictedlabel'>tanzuhuggingface/dev</span>"
                         "<br/>Status:<br/> <span class='metriclabel'>Rank answer</span>"
                         "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
                         "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"

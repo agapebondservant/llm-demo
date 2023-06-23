@@ -64,7 +64,8 @@ with tab1:
         url, answer = llm.run_task(content, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123',
                                    use_topk='n')
         st.markdown(f"<br/>Status:<br/> <span class='metriclabel'>File uploaded</span>"
-                    f"<br/><span style=font-size:1.2em;>{answer}</span>"
+                    f"<br/><span 'font-size:1.2em;' class=predictedlabel>{answer}</span>"
+                    "<br/>Status:<br/> <span class='metriclabel'>Rank answer</span>"
                     "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
                     "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
                     "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
@@ -81,8 +82,8 @@ with tab2:
         if question:
             url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123')
             st.markdown(f"Response:<br/><span style=font-size:1em;><a href=\"{url}\">Matched Document Link</a></span>"
-                        f"<br/><span style=font-size:1.2em;>{answer}</span>"
-                        "<br/>Status:<br/> <span class='metriclabel'>File uploaded</span>"
+                        f"<br/><span style='font-size:1.2em;' class=predictedlabel>{answer}</span>"
+                        "<br/>Status:<br/> <span class='metriclabel'>Rank answer</span>"
                         "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
                         "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
                         "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"

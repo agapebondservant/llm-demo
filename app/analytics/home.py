@@ -85,6 +85,7 @@ with tab2:
                         f"<br/><br/><span style='font-size:1.2em;' class=predictedlabel>{answer}</span>",
                         unsafe_allow_html=True)
 
+    with st.spinner('Querying local data with auto-generated embeddings...'):
             _, summary = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary')
             st.markdown(f"<br/><b>Summary:</b><span style='font-size:1.2em;' class=predictedlabel>{summary}</span>"
                         f"<br/><br/><b>Model Name:</b><br/> <span class='predictedlabel'>tanzuhuggingface/dev</span>"

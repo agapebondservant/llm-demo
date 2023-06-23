@@ -123,7 +123,7 @@ data:
                 ORDER BY context_question <=> e5_large_token_embedding
                 LIMIT 3
             )
-            SELECT url, string_agg(token,'' '') AS result
+            SELECT url, string_agg(token,'' '')::varchar AS result
             FROM data
             GROUP BY url;
         END;

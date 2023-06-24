@@ -12,6 +12,7 @@ st.write("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nanum Gothic');
 @import url('https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css');
+@import url('https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css');
 html, body, [class*="css"]{
    font-family: 'Nanum Gothic';
 }
@@ -28,9 +29,10 @@ span.predictedlabel{
     color: green;
 }
 
-span.metriclabel{
-    font-size: 1em;
-    color: wheat;
+a.demobody {
+  text-decoration: none;
+  color: #272727;
+  background: rgba(240, 233, 241, 0.4);
 }
 
 @keyframes blinker {
@@ -40,11 +42,11 @@ span.metriclabel{
 }
 
 .fa-thumbs-up, .fa-thumbs-down {
-    color: blue;
+    color: orange;
 }
 
 .fa-thumbs-up:hover, .fa-thumbs-down:hover {
-    color: orange;
+    color: gray;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -63,8 +65,9 @@ with tab1:
         content = stringio.read()
         url, answer = llm.run_task(content, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123',
                                    use_topk='n')
-        st.markdown(f"<br/>Status:<br/> <span class='metriclabel'>File uploaded</span>"
-                    f"<br/><span 'font-size:1.2em;' class=predictedlabel>{answer}</span>"
+        st.markdown(f"<div class='card border-light mb-3' style='color: wheat;'>"
+                    f"<div class='card-body'><h5 class='card-title'>Summary</h5>"
+                    f"<p class='card-text'>{answer}</p></div></div>"
                     "<br/>Status:<br/> <span class='metriclabel'>Rank answer</span>"
                     "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
                     "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
@@ -81,15 +84,21 @@ with tab2:
     with st.spinner('Querying local data...'):
         if question:
             url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary', use_topk='y', inference_function_name='run_semantic_search')
-            st.markdown(f"<b>Response:</b><br/><span style=font-size:1em;><a href=\"{url}\">Matched Document Link</a></span>"
-                        f"<br/><br/><span style='font-size:1.2em;font-family:Times;' class=predictedlabel>{answer}</span>",
+            st.markdown(f"<div class='card border-light mb-3' style='color: wheat;'>"
+                        f"<div class='card-body'><h5 class='card-title'>Matched</h5>"
+                        f"<p class='card-text'>{answer}</p>"
+                        f"<a class='demobody' href=\"{url}\" target=\"blank\">View Document</a></div></div>",
                         unsafe_allow_html=True)
 
     with st.spinner('Querying local data with auto-generated embeddings...'):
         if question:
             _, summary = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary')
-            st.markdown(f"<br/><b>Summary:</b><br/><span style='font-size:1.2em;font-family:Times;' class=predictedlabel>{summary}</span>"
-                        f"<br/><br/><b>Model Name:</b><br/> <span class='predictedlabel'>tanzuhuggingface/dev</span>"
+            st.markdown(f"<div class='card border-light mb-3' style='color: wheat;'>"
+                        f"<div class='card-body'><h5 class='card-title'>Summary</h5>"
+                        f"<p class='card-text'>{summary}</p></div></div>"
+                        f"<div class='card border-light mb-3' style='color: wheat;'>"
+                        f"<div class='card-body'><h5 class='card-title'>Model Name</h5>"
+                        f"<p class='card-text'>tanzuhuggingface/dev</p></div></div>"
                         "<br/><br/> <span class='metriclabel'>Rank answer</span>"
                         "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
                         "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"

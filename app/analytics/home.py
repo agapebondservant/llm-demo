@@ -29,10 +29,15 @@ span.predictedlabel{
     color: green;
 }
 
+div.card {
+    background: none;
+}
+
 a.demobody {
   text-decoration: none;
   color: #272727;
-  background: rgba(240, 233, 241, 0.4);
+  padding: 4px;
+  font-size: small;
 }
 
 @keyframes blinker {
@@ -65,7 +70,7 @@ with tab1:
         content = stringio.read()
         url, answer = llm.run_task(content, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123',
                                    use_topk='n')
-        st.markdown(f"<div class='card border-light mb-3' style='color: wheat;'>"
+        st.markdown(f"<div class='card border-light mb-3'>"
                     f"<div class='card-body'><h5 class='card-title'>Summary</h5>"
                     f"<p class='card-text'>{answer}</p></div></div>"
                     "<br/>Status:<br/> <span class='metriclabel'>Rank answer</span>"
@@ -84,19 +89,19 @@ with tab2:
     with st.spinner('Querying local data...'):
         if question:
             url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary', use_topk='y', inference_function_name='run_semantic_search')
-            st.markdown(f"<div class='card border-light mb-3' style='color: wheat;'>"
+            st.markdown(f"<div class='card border-light mb-3'>"
                         f"<div class='card-body'><h5 class='card-title'>Matched</h5>"
-                        f"<p class='card-text'>{answer}</p>"
+                        f"<p class='card-text'>\"{answer}...\"</p>"
                         f"<a class='demobody' href=\"{url}\" target=\"blank\">View Document</a></div></div>",
                         unsafe_allow_html=True)
 
     with st.spinner('Querying local data with auto-generated embeddings...'):
         if question:
             _, summary = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary')
-            st.markdown(f"<div class='card border-light mb-3' style='color: wheat;'>"
+            st.markdown(f"<div class='card border-light mb-3'>"
                         f"<div class='card-body'><h5 class='card-title'>Summary</h5>"
                         f"<p class='card-text'>{summary}</p></div></div>"
-                        f"<div class='card border-light mb-3' style='color: wheat;'>"
+                        f"<div class='card border-light mb-3'>"
                         f"<div class='card-body'><h5 class='card-title'>Model Name</h5>"
                         f"<p class='card-text'>tanzuhuggingface/dev</p></div></div>"
                         "<br/><br/> <span class='metriclabel'>Rank answer</span>"

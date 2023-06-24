@@ -35,7 +35,6 @@ div.card {
 
 a.demobody {
   text-decoration: none;
-  color: #272727;
   padding: 4px;
   font-size: small;
 }
@@ -72,12 +71,14 @@ with tab1:
                                    use_topk='n')
         st.markdown(f"<div class='card border-light mb-3'>"
                     f"<div class='card-body'><h5 class='card-title'>Summary</h5>"
-                    f"<p class='card-text'>{answer}</p></div></div>"
-                    "<br/>Status:<br/> <span class='metriclabel'>Rank answer</span>"
+                    f"<p class='card-text'>{answer}</p>"
+                    f"<div class='card-footer text-muted'>"
+                    "Rank answer"
                     "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
                     "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
                     "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-                    "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>",
+                    "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
+                    f"</div></div></div>",
                     unsafe_allow_html=True)
 
 # AIBot
@@ -91,8 +92,15 @@ with tab2:
             url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary', use_topk='y', inference_function_name='run_semantic_search')
             st.markdown(f"<div class='card border-light mb-3'>"
                         f"<div class='card-body'><h5 class='card-title'>Matched</h5>"
-                        f"<p class='card-text'>\"{answer}...\"</p>"
-                        f"<a class='demobody' href=\"{url}\" target=\"blank\">View Document</a></div></div>",
+                        f"<p class='card-text' style='font-style:italic;'>\"{answer}...\"</p>"
+                        f"<a class='demobody' href=\"{url}\" target=\"blank\">View Document</a>"
+                        f"<div class='card-footer text-muted'>"
+                        "Rank answer"
+                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                        "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
+                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                        "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
+                        f"</div></div></div>",
                         unsafe_allow_html=True)
 
     with st.spinner('Querying local data with auto-generated embeddings...'):
@@ -100,15 +108,17 @@ with tab2:
             _, summary = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary')
             st.markdown(f"<div class='card border-light mb-3'>"
                         f"<div class='card-body'><h5 class='card-title'>Summary</h5>"
-                        f"<p class='card-text'>{summary}</p></div></div>"
-                        f"<div class='card border-light mb-3'>"
-                        f"<div class='card-body'><h5 class='card-title'>Model Name</h5>"
-                        f"<p class='card-text'>tanzuhuggingface/dev</p></div></div>"
-                        "<br/><br/> <span class='metriclabel'>Rank answer</span>"
+                        f"<p class='card-text'>{summary}</p>"
+                        f"<div class='card-footer text-muted'>"
+                        "Rank answer"
                         "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
                         "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
                         "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-                        "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>",
+                        "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
+                        f"</div></div></div>"
+                        f"<div class='card border-light mb-3'>"
+                        f"<div class='card-body'><h5 class='card-title'>Model Name</h5>"
+                        f"<p class='card-text'>tanzuhuggingface/dev</p></div></div>",
                         unsafe_allow_html=True)
 
 # Refresh the screen at a configured interval

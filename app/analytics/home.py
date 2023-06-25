@@ -87,7 +87,7 @@ with tab1:
                             "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
                             f"</div></div></div>",
                             unsafe_allow_html=True)
-        st.session_state.upl_file = uploaded_file
+        st.session_state['upl_file'] = uploaded_file
 
 # AIBot
 with tab2:
@@ -113,7 +113,7 @@ with tab2:
                             f"</div></div></div>",
                             unsafe_allow_html=True)
 
-    if question is not None and question != st.session_state.aibot:
+    if question is not None and question != st.session_state.get('aibot'):
         placeholder3.empty()
         with placeholder3.container():
             with st.spinner('Querying local data with auto-generated embeddings...'):
@@ -132,7 +132,7 @@ with tab2:
                             f"<div class='card-body'><h5 class='card-title'>Model Name</h5>"
                             f"<p class='card-text'>tanzuhuggingface/dev</p></div></div>",
                             unsafe_allow_html=True)
-        st.session_state.aibot = question
+        st.session_state['aibot'] = question
 
 # Refresh the screen at a configured interval
 # st_autorefresh(interval=60 * 15 * 1000, key="anomalyrefresher")

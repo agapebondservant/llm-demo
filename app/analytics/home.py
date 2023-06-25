@@ -55,43 +55,54 @@ a.demobody {
 </style>
 """, unsafe_allow_html=True)
 
+if 'upl_file' not in st.session_state:
+    st.session_state.upl_file = None
+
+if 'aibot' not in st.session_state:
+    st.session_state.aibot = None
+
 st.header('Tanzu/Vmware LLM Analytics with Postgres and Huggingface Demo')
 
 st.text('Demonstration of question-answering transformers using neutral networks and Vmware Tanzu')
 
 tab1, tab2 = st.tabs(["Text Summarization", "AI Bot"])
 
+uploaded_file, question = None, None
+
 # Text Summarization
 with tab1:
-    uploaded_file = st.file_uploader("Select a PDF file to summarize", key="upl_cifar")
-    if uploaded_file is not None:
-        stringio = StringIO(uploaded_file.getvalue().encode('ascii', 'replace').decode())
-        content = stringio.read()
-        url, answer = llm.run_task(content, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123',
-                                   use_topk='n')
-        st.markdown(f"<div class='card border-light mb-3'>"
-                    f"<div class='card-body'><h5 class='card-title'>Summary</h5>"
-                    f"<p class='card-text'>{answer}</p>"
-                    f"<div class='card-footer text-muted'>"
-                    "Rank answer"
-                    "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-                    "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
-                    "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-                    "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
-                    f"</div></div></div>",
-                    unsafe_allow_html=True)
+    st.file_uploader("Select a PDF file to summarize", key="upl_file")
+    if uploaded_file != st.session_state.upl_file:
+        uploaded_file = st.session_state.upl_file
+        with st.spinner('Summarizing file...'):
+            stringio = StringIO(uploaded_file.getvalue().decode())
+            content = stringio.read()
+            url, answer = llm.run_task(content, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123',
+                                       use_topk='n')
+            st.markdown(f"<div class='card border-light mb-3'>"
+                        f"<div class='card-body'><h4 class='card-title'>Summary</h4>"
+                        f"<p class='card-text'>{answer}</p>"
+                        f"<div class='card-footer text-muted'>"
+                        "Rank answer"
+                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                        "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
+                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                        "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
+                        f"</div></div></div>",
+                        unsafe_allow_html=True)
 
 # AIBot
 with tab2:
     st.markdown("This bot uses <b>on-premise data</b> to provide information about VMware technologies.<br/>",
                 unsafe_allow_html=True)
 
-    question = st.text_input('Your question', '''''', key='aibot')
+    st.text_input('Your question', '''''', key='aibot')
     with st.spinner('Querying local data...'):
-        if question:
+        if question != st.session_state.aibot:
+            question = st.session_state.aibot
             url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary', use_topk='y', inference_function_name='run_semantic_search')
             st.markdown(f"<div class='card border-light mb-3'>"
-                        f"<div class='card-body'><h5 class='card-title'>Matched</h5>"
+                        f"<div class='card-body'><h4 class='card-title'>Matched Documents</h4>"
                         f"<p class='card-text' style='font-style:italic;'>\"{answer}...\"</p>"
                         f"<a class='demobody' href=\"{url}\" target=\"blank\">View Document</a>"
                         f"<div class='card-footer text-muted'>"
@@ -103,23 +114,22 @@ with tab2:
                         f"</div></div></div>",
                         unsafe_allow_html=True)
 
-    with st.spinner('Querying local data with auto-generated embeddings...'):
-        if question:
-            _, summary = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary')
-            st.markdown(f"<div class='card border-light mb-3'>"
-                        f"<div class='card-body'><h5 class='card-title'>Summary</h5>"
-                        f"<p class='card-text'>{summary}</p>"
-                        f"<div class='card-footer text-muted'>"
-                        "Rank answer"
-                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-                        "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
-                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-                        "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
-                        f"</div></div></div>"
-                        f"<div class='card border-light mb-3'>"
-                        f"<div class='card-body'><h5 class='card-title'>Model Name</h5>"
-                        f"<p class='card-text'>tanzuhuggingface/dev</p></div></div>",
-                        unsafe_allow_html=True)
+            with st.spinner('Querying local data with auto-generated embeddings...'):
+                _, summary = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary')
+                st.markdown(f"<div class='card border-light mb-3'>"
+                            f"<div class='card-body'><h4 class='card-title'>Summary</h4>"
+                            f"<p class='card-text'>{summary}</p>"
+                            f"<div class='card-footer text-muted'>"
+                            "Rank answer"
+                            "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                            "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
+                            "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                            "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
+                            f"</div></div></div>"
+                            f"<div class='card border-light mb-3'>"
+                            f"<div class='card-body'><h5 class='card-title'>Model Name</h5>"
+                            f"<p class='card-text'>tanzuhuggingface/dev</p></div></div>",
+                            unsafe_allow_html=True)
 
 # Refresh the screen at a configured interval
-st_autorefresh(interval=60 * 15 * 1000, key="anomalyrefresher")
+# st_autorefresh(interval=60 * 15 * 1000, key="anomalyrefresher")

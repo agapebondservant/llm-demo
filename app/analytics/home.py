@@ -68,7 +68,7 @@ placeholder1, placeholder2, placeholder3 = st.empty(), st.empty(), st.empty()
 # Text Summarization
 with tab1:
     uploaded_file = st.file_uploader("Select a PDF file to summarize")
-    if uploaded_file is not None and uploaded_file != st.session_state.get('upl_file'):
+    if uploaded_file and uploaded_file != st.session_state.get('upl_file'):
         placeholder1.empty()
         with placeholder1.container():
             with st.spinner('Summarizing file...'):
@@ -95,7 +95,7 @@ with tab2:
                 unsafe_allow_html=True)
 
     question = st.text_input('Your question', '''''')
-    if question is not None and question != st.session_state.get('aibot'):
+    if question and question != st.session_state.get('aibot'):
         placeholder2.empty()
         with placeholder2.container():
             with st.spinner('Querying local data...'):
@@ -113,7 +113,7 @@ with tab2:
                             f"</div></div></div>",
                             unsafe_allow_html=True)
 
-    if question is not None and question != st.session_state.get('aibot'):
+    if question and question != st.session_state.get('aibot'):
         placeholder3.empty()
         with placeholder3.container():
             with st.spinner('Querying local data with auto-generated embeddings...'):

@@ -69,27 +69,32 @@ tab1, tab2 = st.tabs(["Text Summarization", "AI Bot"])
 
 uploaded_file, question = None, None
 
+
+placeholder1, placeholder2, placeholder3 = st.empty(), st.empty(), st.empty()
+
 # Text Summarization
 with tab1:
     st.file_uploader("Select a PDF file to summarize", key="upl_file")
-    if uploaded_file != st.session_state.upl_file:
-        uploaded_file = st.session_state.upl_file
-        with st.spinner('Summarizing file...'):
-            stringio = StringIO(uploaded_file.getvalue().decode())
-            content = stringio.read()
-            url, answer = llm.run_task(content, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123',
-                                       use_topk='n')
-            st.markdown(f"<div class='card border-light mb-3'>"
-                        f"<div class='card-body'><h4 class='card-title'>Summary</h4>"
-                        f"<p class='card-text'>{answer}</p>"
-                        f"<div class='card-footer text-muted'>"
-                        "Rank answer"
-                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-                        "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
-                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-                        "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
-                        f"</div></div></div>",
-                        unsafe_allow_html=True)
+    if uploaded_file is not None and uploaded_file != st.session_state.upl_file:
+        placeholder1.empty()
+        with placeholder1.container():
+            uploaded_file = st.session_state.upl_file
+            with st.spinner('Summarizing file...'):
+                stringio = StringIO(uploaded_file.getvalue().decode())
+                content = stringio.read()
+                url, answer = llm.run_task(content, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='testinference123',
+                                           use_topk='n')
+                st.markdown(f"<div class='card border-light mb-3'>"
+                            f"<div class='card-body'><h4 class='card-title'>Summary</h4>"
+                            f"<p class='card-text'>{answer}</p>"
+                            f"<div class='card-footer text-muted'>"
+                            "Rank answer"
+                            "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                            "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
+                            "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                            "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
+                            f"</div></div></div>",
+                            unsafe_allow_html=True)
 
 # AIBot
 with tab2:
@@ -97,24 +102,29 @@ with tab2:
                 unsafe_allow_html=True)
 
     st.text_input('Your question', '''''', key='aibot')
-    with st.spinner('Querying local data...'):
-        if question != st.session_state.aibot:
-            question = st.session_state.aibot
-            url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary', use_topk='y', inference_function_name='run_semantic_search')
-            st.markdown(f"<div class='card border-light mb-3'>"
-                        f"<div class='card-body'><h4 class='card-title'>Matched Documents</h4>"
-                        f"<p class='card-text' style='font-style:italic;'>\"{answer}...\"</p>"
-                        f"<a class='demobody' href=\"{url}\" target=\"blank\">View Document</a>"
-                        f"<div class='card-footer text-muted'>"
-                        "Rank answer"
-                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-                        "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
-                        "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
-                        "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
-                        f"</div></div></div>",
-                        unsafe_allow_html=True)
+    if question is not None and question != st.session_state.aibot:
+        placeholder2.empty()
+        with placeholder2.container():
+            with st.spinner('Querying local data...'):
+                url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary', use_topk='y', inference_function_name='run_semantic_search')
+                st.markdown(f"<div class='card border-light mb-3'>"
+                            f"<div class='card-body'><h4 class='card-title'>Matched Documents</h4>"
+                            f"<p class='card-text' style='font-style:italic;'>\"{answer}...\"</p>"
+                            f"<a class='demobody' href=\"{url}\" target=\"blank\">View Document</a>"
+                            f"<div class='card-footer text-muted'>"
+                            "Rank answer"
+                            "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                            "</i><i class='fa fa-thumbs-up fa-stack-1x fa-inverse'></i></span>"
+                            "<span class='fa-stack fa-2x'><i class='fa fa-circle fa-stack-2x'>"
+                            "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
+                            f"</div></div></div>",
+                            unsafe_allow_html=True)
 
+    if question is not None and question != st.session_state.aibot:
+        placeholder3.empty()
+        with placeholder3.container():
             with st.spinner('Querying local data with auto-generated embeddings...'):
+                question = st.session_state.aibot
                 _, summary = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary')
                 st.markdown(f"<div class='card border-light mb-3'>"
                             f"<div class='card-body'><h4 class='card-title'>Summary</h4>"

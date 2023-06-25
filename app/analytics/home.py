@@ -55,12 +55,6 @@ a.demobody {
 </style>
 """, unsafe_allow_html=True)
 
-if 'upl_file' not in st.session_state:
-    st.session_state.upl_file = None
-
-if 'aibot' not in st.session_state:
-    st.session_state.aibot = None
-
 st.header('Tanzu/Vmware LLM Analytics with Postgres and Huggingface Demo')
 
 st.text('Demonstration of question-answering transformers using neutral networks and Vmware Tanzu')
@@ -69,16 +63,14 @@ tab1, tab2 = st.tabs(["Text Summarization", "AI Bot"])
 
 uploaded_file, question = None, None
 
-
 placeholder1, placeholder2, placeholder3 = st.empty(), st.empty(), st.empty()
 
 # Text Summarization
 with tab1:
-    st.file_uploader("Select a PDF file to summarize", key="upl_file")
-    if uploaded_file is not None and uploaded_file != st.session_state.upl_file:
+    uploaded_file = st.file_uploader("Select a PDF file to summarize")
+    if uploaded_file is not None and uploaded_file != st.session_state.get('upl_file'):
         placeholder1.empty()
         with placeholder1.container():
-            uploaded_file = st.session_state.upl_file
             with st.spinner('Summarizing file...'):
                 stringio = StringIO(uploaded_file.getvalue().decode())
                 content = stringio.read()
@@ -95,14 +87,15 @@ with tab1:
                             "</i><i class='fa fa-thumbs-down fa-stack-1x fa-inverse'></i></span>"
                             f"</div></div></div>",
                             unsafe_allow_html=True)
+        st.session_state.upl_file = uploaded_file
 
 # AIBot
 with tab2:
     st.markdown("This bot uses <b>on-premise data</b> to provide information about VMware technologies.<br/>",
                 unsafe_allow_html=True)
 
-    st.text_input('Your question', '''''', key='aibot')
-    if question is not None and question != st.session_state.aibot:
+    question = st.text_input('Your question', '''''')
+    if question is not None and question != st.session_state.get('aibot'):
         placeholder2.empty()
         with placeholder2.container():
             with st.spinner('Querying local data...'):
@@ -124,7 +117,6 @@ with tab2:
         placeholder3.empty()
         with placeholder3.container():
             with st.spinner('Querying local data with auto-generated embeddings...'):
-                question = st.session_state.aibot
                 _, summary = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary')
                 st.markdown(f"<div class='card border-light mb-3'>"
                             f"<div class='card-body'><h4 class='card-title'>Summary</h4>"
@@ -140,6 +132,7 @@ with tab2:
                             f"<div class='card-body'><h5 class='card-title'>Model Name</h5>"
                             f"<p class='card-text'>tanzuhuggingface/dev</p></div></div>",
                             unsafe_allow_html=True)
+        st.session_state.aibot = question
 
 # Refresh the screen at a configured interval
 # st_autorefresh(interval=60 * 15 * 1000, key="anomalyrefresher")

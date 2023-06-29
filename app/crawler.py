@@ -96,14 +96,16 @@ def scrape_slack_url(env_file_path: str, cookies_file_path: str, experiment_name
     """
 
     # TODO: Use python libraries instead of a subprocess
-    os.system(f'resources/scripts/scrape-slack.sh {cookies_file_path} ../{env_file_path}')
+    # os.system(f'resources/scripts/scrape-slack.sh {cookies_file_path} ../{env_file_path}')
 
-    files = os.listdir('slack-data')
-    for file in files:
-        if file.endswith('json'):
-            logger.info(f"Extracting text from json file...{file}")
-            extracted_json = os.popen(f"jq -c '.[]' {file}").read()
-            data_loader.store_tokens(file, extracted_json, experiment_name, loader_function_name='run_json_loader_task')
+    dirpath = 'slack-data'
+    files = os.listdir(dirpath)
+    for f in files:
+        if f.endswith('json'):
+            filename = os.path.abspath(os.path.join(dirpath, f))
+            logger.info(f"Extracting text from json file...{filename}")
+            extracted_json = os.popen(f"jq -c '.' {filename}").read()
+            data_loader.store_tokens(f, extracted_json, experiment_name, loader_function_name='run_json_loader_task')
 
 
 def find_and_download_pdf_links(base_url_path: str, redirect_url_path: str, download_path: str):

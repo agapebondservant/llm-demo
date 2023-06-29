@@ -79,15 +79,15 @@ $(which python3) -c "import os; from app import crawler; crawler.scrape_sharepoi
 - Ensure that the following file exists: ~/Downloads/app.slack.com.cookies.json
 ```
 
-3Test slack scraper:
+3. Test slack scraper:
 ```
+source .env
 export LB_ENDPOINT=$(kubectl get svc postgresml-bitnami-postgresql -n ${DATA_E2E_POSTGRESML_NS} -o jsonpath="{.status.loadBalancer.ingress[0].hostname}");
-export DATA_E2E_LLMAPP_TRAINING_DB_URI=postgresql://postgres:${DATA_E2E_BITNAMI_AUTH_PASSWORD}@${LB_ENDPOINT}:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE};sslmode=allow;
 LLM_DEMO_EMAIL=oawofolu@vmware.com \
 LLM_DEMO_SLACK_ENV_PATH='resources/slack/.env' \
 LLM_DEMO_COOKIES_PATH='~/Downloads/app.slack.com.cookies.json' \
 $(which python3) -c "import os; from app import crawler; crawler.scrape_slack_url(env_file_path=os.environ['LLM_DEMO_SLACK_ENV_PATH'], cookies_file_path=os.environ['LLM_DEMO_COOKIES_PATH'], experiment_name='scraper99999')"
-rm -rf slack/
+# rm -rf slack/
 ```   
 
 ### Deploy Bitnami Postgres on Kubernetes<a name="pg4k8s"/>

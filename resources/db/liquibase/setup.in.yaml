@@ -81,63 +81,65 @@ data:
         DECLARE
         return_count int;
         BEGIN
-          INSERT INTO ${XYZSCHEMA}.vmware_slack_raw(doc)
-          VALUES(data::jsonb);
-
-          WITH extracted AS (
-              	SELECT id AS extracted_id,
-              	       doc -> ''date''#>> ''{}'' AS extracted_date,
-              		   doc ->''posts''->0->''time''#>> ''{}'' AS extracted_time,
-              		   doc ->''posts''->0->''sender''#>> ''{}'' AS extracted_sender,
-              		   doc->''posts''->0->''text''#>> ''{}'' AS extracted_post,
-               		   jsonb_extract_path(jsonb_array_elements(doc->''posts''->0->''replies''),''text'') #>> ''{}'' AS extracted_reply
-               		   FROM ${XYZSCHEMA}.vmware_slack_raw
+          WITH docset AS (
+                  INSERT INTO ${XYZSCHEMA}.vmware_slack_raw(doc)
+                  SELECT jsonb_array_elements(
+                            jsonb_extract_path(jsonb_array_elements( format(''%s'',data)::jsonb), ''posts''))
+                  RETURNING id, doc
+                ),
+               extracted AS (
+                SELECT id AS extracted_id,
+                       doc->''timestamp''#>> ''{}'' AS extracted_date,
+                       doc->''time''#>> ''{}'' AS extracted_time,
+                       doc->''sender''#>> ''{}'' AS extracted_sender,
+                       doc->''text''#>> ''{}'' AS extracted_post,
+                       jsonb_extract_path(
+                          jsonb_array_elements(doc->''replies''),''text'') #>> ''{}'' AS extracted_reply
+                       FROM docset
                ),
                cleaned AS (
-               	SELECT extracted_id AS cleaned_id,
-               	       regexp_replace(extracted_post, ''\s*(<[^>]+>|<script.+?<\/script>|<style.+?<\/style>)\s*'','''',''gi'') AS cleaned_post,
-              		   regexp_replace(extracted_reply, ''\s*(<[^>]+>|<script.+?<\/script>|<style.+?<\/style>)\s*'','''',''gi'') AS cleaned_reply,
-              		   extracted_date AS cleaned_date,
-              		   extracted_time AS cleaned_time,
-              		   extracted_sender AS cleaned_sender
-              		   FROM extracted
+                SELECT extracted_id AS cleaned_id,
+                       regexp_replace(extracted_post, ''\s*(<[^>]+>|<script.+?<\/script>|<style.+?<\/style>)\s*'','''',''gi'') AS cleaned_post,
+                       regexp_replace(extracted_reply, ''\s*(<[^>]+>|<script.+?<\/script>|<style.+?<\/style>)\s*'','''',''gi'') AS cleaned_reply,
+                       extracted_date AS cleaned_date,
+                       extracted_time AS cleaned_time,
+                       extracted_sender AS cleaned_sender
+                       FROM extracted
                ),
                sentiment_analyzed AS (
-               	SELECT cleaned_id AS post_doc_id,
-               	       cleaned_post AS post,
-          	           cleaned_reply AS reply,
-          		       pgml.transform(
-          		   		''{"model": "cardiffnlp/twitter-roberta-base-sentiment"}''::JSONB,
-          		    	inputs => ARRAY[cleaned_reply]
-          		       )::jsonb AS sentiment,
-          	    	   cleaned_date AS post_date,
-          	    	   cleaned_time AS post_time,
-          	    	   cleaned_sender AS post_sender
-          	    	   FROM cleaned
-               ),
-               distinct_posts AS (
-               	SELECT distinct post_doc_id AS distinct_post_doc_id,
-               					post AS distinct_post
-               					FROM sentiment_analyzed
+                SELECT cleaned_id AS post_doc_id,
+                       cleaned_post AS post,
+                       cleaned_reply AS reply,
+                       /*pgml.transform(
+                        ''{"model": "cardiffnlp/twitter-roberta-base-sentiment"}''::JSONB,
+                        inputs => ARRAY[cleaned_reply]
+                       )::jsonb AS sentiment,*/
+                       ''LABEL-1'' as sentiment,
+                       cleaned_date AS post_date,
+                       cleaned_time AS post_time,
+                       cleaned_sender AS post_sender
+                       FROM cleaned
                ),
                insert_metadata_table AS (
-                  INSERT INTO vmware_slack_scrape_metadata(doc_id, summary, token)
-               	SELECT  distinct_post_doc_id,
-               			distinct_post ,
-               			pgml.chunk(''recursive_character'',
-                      				distinct_post,
-                      				json_build_object(''chunk_size'',chunk_size,''chunk_overlap'',chunk_overlap)::JSONB)
-               			FROM sentiment_analyzed, distinct_posts
-               			WHERE sentiment_analyzed.post_doc_id = distinct_posts.distinct_post_doc_id
-                  		RETURNING id, doc_id, summary, token
-               )
-          INSERT INTO ${XYZSCHEMA}.vmware_slack_scrape_content(id, doc_id, post, post_date, post_time, post_sender, reply, sentiment)
-              SELECT id, doc_id, summary, post_date, post_time, post_sender, reply, sentiment
-              FROM insert_metadata_table
-              JOIN sentiment_analyzed
-              ON insert_metadata_table.doc_id = sentiment_analyzed.post_doc_id
-              ON CONFLICT DO NOTHING;
-        END
+                    INSERT INTO ${XYZSCHEMA}.vmware_slack_scrape_content(doc_id, post, post_date, post_time, post_sender, reply, sentiment)
+                        SELECT post_doc_id as inserted_doc_id,
+                        post as inserted_post,
+                        post_date, post_time, post_sender, reply, sentiment
+                        FROM sentiment_analyzed
+                        ON CONFLICT DO NOTHING
+                    RETURNING doc_id, post
+              )
+              INSERT INTO vmware_slack_scrape_metadata(doc_id, summary, token)
+              SELECT  doc_id,
+                      post ,
+                      pgml.chunk(''recursive_character'',
+                                  post,
+                                  json_build_object(''chunk_size'',chunk_size,''chunk_overlap'',chunk_overlap)::JSONB)
+                      FROM insert_metadata_table
+                      ON CONFLICT DO NOTHING;
+          GET DIAGNOSTICS return_count := ROW_COUNT;
+          RETURN return_count;
+        END;
         '
         LANGUAGE plpgsql;
 

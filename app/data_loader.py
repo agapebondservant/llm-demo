@@ -57,7 +57,6 @@ def store_tokens(url_path: str, text: str, experiment_name: str, chunk_size: int
             )
             os.environ['MLFLOW_EXPERIMENT_NAME'] = experiment_name
             mlflow.set_tags({"embeddable_docs": "y"})
-            mlflow.log_dict({url_path: num_tokens}, 'data')
 
     except Exception as ee:
         logger.info("An Exception occurred...", exc_info=True)

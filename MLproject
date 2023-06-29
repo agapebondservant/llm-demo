@@ -18,6 +18,6 @@ entry_points:
 
   promote_model_to_staging:
       parameters:
-            model-repo: {default: "question-answering-finetuned"}
+          model-repo: {default: "question-answering-finetuned"}
           pipeline-name: {default: "question-answering"}
       command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"tanzuhuggingface/{model-repo}\",\"{pipeline-name}\")"'

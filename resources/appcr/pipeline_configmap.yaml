@@ -10,12 +10,46 @@ data:
   generate_embeddings.sql: |
     DO $$
     BEGIN
-        FOR i in (SELECT coalesce(min(id),0) FROM public.vmware_doc_scrape_metadata where e5_large_token_embedding IS NULL)..
-                 (SELECT coalesce(max(id),0) FROM public.vmware_doc_scrape_metadata where e5_large_token_embedding IS NULL) by 100 LOOP
+        -- updates for vmware_doc_scrape_metadata
+         FOR i in (SELECT coalesce(min(id),0) FROM public.vmware_doc_scrape_metadata where e5_large_token_embedding IS NULL)..
+                  (SELECT coalesce(max(id),0) FROM public.vmware_doc_scrape_metadata where e5_large_token_embedding IS NULL) by 100 LOOP
+             BEGIN RAISE NOTICE 'updating % to %', i, i + 100; END;
+
+             UPDATE public.vmware_doc_scrape_metadata
+             SET e5_large_token_embedding = pgml.embed('distilbert-base-uncased', 'passage: ' || token)::vector(768)
+             WHERE id BETWEEN i AND i + 100;
+             COMMIT;
+         END LOOP;
+
+         -- updates for vmware_slack_scrape_metadata
+         FOR i in (SELECT coalesce(min(id),0) FROM public.vmware_slack_scrape_metadata where e5_large_token_embedding IS NULL)..
+                  (SELECT coalesce(max(id),0) FROM public.vmware_slack_scrape_metadata where e5_large_token_embedding IS NULL) by 100 LOOP
+             BEGIN RAISE NOTICE 'updating % to %', i, i + 100; END;
+
+             UPDATE public.vmware_slack_scrape_metadata
+             SET e5_large_token_embedding = pgml.embed('distilbert-base-uncased', 'passage: ' || token)::vector(768)
+             WHERE id BETWEEN i AND i + 100;
+             COMMIT;
+         END LOOP;
+
+        -- updates for vmware_slack_scrape_metadata
+        FOR i in (SELECT coalesce(min(id),0) FROM .vmware_slack_scrape_metadata where e5_large_token_embedding IS NULL)..
+                 (SELECT coalesce(max(id),0) FROM .vmware_slack_scrape_metadata where e5_large_token_embedding IS NULL) by 100 LOOP
             BEGIN RAISE NOTICE 'updating % to %', i, i + 100; END;
 
-            UPDATE public.vmware_doc_scrape_metadata
+            UPDATE .vmware_slack_scrape_metadata
             SET e5_large_token_embedding = pgml.embed('distilbert-base-uncased', 'passage: ' || token)::vector(768)
+            WHERE id BETWEEN i AND i + 100;
+            COMMIT;
+        END LOOP;
+
+        -- updates for vmware_slack_scrape_content
+        FOR i in (SELECT coalesce(min(id),0) FROM .vmware_slack_scrape_content IS NULL)..
+                 (SELECT coalesce(max(id),0) FROM .vmware_slack_scrape_content IS NULL) by 100 LOOP
+            BEGIN RAISE NOTICE 'updating % to %', i, i + 100; END;
+            UPDATE .vmware_slack_scrape_content
+            SET sentiment = pgml.transform('{"model": "cardiffnlp/twitter-roberta-base-sentiment"}'::JSONB,
+                                            inputs => ARRAY[post])::jsonb
             WHERE id BETWEEN i AND i + 100;
             COMMIT;
         END LOOP;
@@ -24,6 +58,11 @@ data:
 
     CREATE INDEX CONCURRENTLY IF NOT EXISTS index_e5_large_token_embedding
     ON public.vmware_doc_scrape_metadata
+    USING ivfflat (e5_large_token_embedding vector_cosine_ops)
+    WITH (lists = 4);
+
+    CREATE INDEX CONCURRENTLY IF NOT EXISTS index_slack_e5_large_token_embedding
+    ON public.vmware_slack_scrape_metadata
     USING ivfflat (e5_large_token_embedding vector_cosine_ops)
     WITH (lists = 4);
   create_custom_huggingface_repo.sh: |

@@ -69,6 +69,8 @@ def publish_model(repo_name: str, pretrained_model_name: str):
                   f"rm -rf ../{pretrained_model_name}; "
                   "git add .;"
                   "git commit -m 'Uploaded pretrained model';"
+                  "git config --global user.email 'tanzuhuggingface@example.com';"
+                  "git config --global user.name 'Tanzu Huggingface';"
                   f"git push; "
                   f"cd -; rm -rf {repo_name}")
 

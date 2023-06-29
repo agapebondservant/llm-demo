@@ -110,11 +110,7 @@ data:
                 SELECT cleaned_id AS post_doc_id,
                        cleaned_post AS post,
                        cleaned_reply AS reply,
-                       /*pgml.transform(
-                        ''{"model": "cardiffnlp/twitter-roberta-base-sentiment"}''::JSONB,
-                        inputs => ARRAY[cleaned_reply]
-                       )::jsonb AS sentiment,*/
-                       ''LABEL-1'' as sentiment,
+                       NULL as sentiment,
                        cleaned_date AS post_date,
                        cleaned_time AS post_time,
                        cleaned_sender AS post_sender

@@ -28,6 +28,17 @@ data:
             WHERE id BETWEEN i AND i + 100;
             COMMIT;
         END LOOP;
+
+        -- updates for vmware_slack_scrape_content
+        FOR i in (SELECT coalesce(min(id),0) FROM ${XYZSCHEMA}.vmware_slack_scrape_content IS NULL)..
+                 (SELECT coalesce(max(id),0) FROM ${XYZSCHEMA}.vmware_slack_scrape_content IS NULL) by 100 LOOP
+            BEGIN RAISE NOTICE 'updating % to %', i, i + 100; END;
+            UPDATE ${XYZSCHEMA}.vmware_slack_scrape_content
+            SET sentiment = pgml.transform('{"model": "cardiffnlp/twitter-roberta-base-sentiment"}'::JSONB,
+                                            inputs => ARRAY[post])::jsonb
+            WHERE id BETWEEN i AND i + 100;
+            COMMIT;
+        END LOOP;
     END;
     $$;
 

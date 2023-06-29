@@ -55,9 +55,9 @@ def extract_metadata_from_pdf(file_path: str):
     return data
 
 
-def scrape_url(base_url_path: str, redirect_url_path: str, experiment_name='scraper'):
+def scrape_sharepoint_url(base_url_path: str, redirect_url_path: str, experiment_name='scraper'):
     """
-    Scrapes the provides Sharepoint URL for pdf links.
+    Scrapes the provided Sharepoint URL for pdf links.
     :param experiment_name: MLflow experiment that this task will be associated with
     :param base_url_path: Base domain of the Sharepoint folder to scrape (ex. http://onevmw.sharepoint.com)
     :param redirect_url_path: Full URL of the Sharepoint folder to scrape
@@ -84,6 +84,26 @@ def scrape_url(base_url_path: str, redirect_url_path: str, experiment_name='scra
 
     driver.quit()
     return links is not None
+
+
+def scrape_slack_url(env_file_path: str, cookies_file_path: str, experiment_name='scraper'):
+    """
+    Scrapes the provided Slack channel(s).
+    :param env_file_path: Path to the environment file to use for scraping
+    :param cookies_file_path: Path to the cookies file to use for scraping
+    :param experiment_name: MLflow experiment that this task will be associated with
+    :return: A list of links to the scraped conversations
+    """
+
+    # TODO: Use python libraries instead of a subprocess
+    os.system(f'resources/scripts/scrape-slack.sh {cookies_file_path} ../{env_file_path}')
+
+    files = os.listdir('slack-data')
+    for file in files:
+        if file.endswith('json'):
+            logger.info(f"Extracting text from json file...{file}")
+            extracted_json = os.popen(f"jq -c '.[]' {file}").read()
+            data_loader.store_tokens(file, extracted_json, experiment_name, loader_function_name='run_json_loader_task')
 
 
 def find_and_download_pdf_links(base_url_path: str, redirect_url_path: str, download_path: str):

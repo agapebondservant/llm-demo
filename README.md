@@ -19,14 +19,15 @@ tanzu acc create llm-demo --git-repository https://github.com/agapebondservant/l
 ## Contents
 1. [Install required Python libraries](#pythonlib)
 2. [Set up access control/credentials](#accesscontrol)
-3. [Set up web crawler](#crawler)
-4. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
-5. [Set up Training and Test Dbs](#traintestdbs)
-6. [Generate embeddings](#embeddings)
-7. [Set up HuggingFace model repo](#huggingfacerepo)
-8. [Integrate HuggingFace model with DataHub](#datahub)
-9. [Set up Other Argo Pipelines](#argopipelines)
-10. [Deploy Demo app](#demoapp)
+3. [Set up web crawler](#web-crawler)
+4. [Set up Slack crawler](#slack-crawler)
+5. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
+6. [Set up Training and Test Dbs](#traintestdbs)
+7. [Generate embeddings](#embeddings)
+8. [Set up HuggingFace model repo](#huggingfacerepo)
+9. [Integrate HuggingFace model with DataHub](#datahub)
+10. [Set up Other Argo Pipelines](#argopipelines)
+11. [Deploy Demo app](#demoapp)
 
 ### Install required Python libraries<a name="pythonlib"/>
 Install required Python libraries:
@@ -43,7 +44,7 @@ kubectl apply -f config/tap-rbac.yaml -ndefault
 kubectl apply -f config/tap-rbac-2.yaml -ndefault
 ```
 
-### Set up web crawler<a name="crawler"/>
+### Set up web crawler<a name="web-crawler"/>
 
 1. To set up host machine for WebCrawler (Mac):
 ```
@@ -61,8 +62,33 @@ export DATA_E2E_LLMAPP_TRAINING_DB_URI=postgresql://postgres:${DATA_E2E_BITNAMI_
 LLM_DEMO_EMAIL=oawofolu@vmware.com \
 BASE_URL='https://onevmw.sharepoint.com' \
 FINAL_URL='https://onevmw.sharepoint.com/:f:/r/teams/TSL-v20/Shared%20Documents/Tanzu%20AI%20-%20ML/Resources/Demos/LLM%20Demo/docs' \
-$(which python3) -c "import os; from app import crawler; crawler.scrape_url(base_url_path=os.environ['BASE_URL'], redirect_url_path=os.environ['FINAL_URL'], experiment_name='scraper12333')"
-```         
+$(which python3) -c "import os; from app import crawler; crawler.scrape_sharepoint_url(base_url_path=os.environ['BASE_URL'], redirect_url_path=os.environ['FINAL_URL'], experiment_name='scraper12333')"
+```      
+
+### Set up slack crawler<a name="slack-crawler"/>
+
+1. Set up pre-requisites:
+[] Chrome plugin - "Export cookie json file for Pupeteer"
+[] Environment properties - Update slack/.env as appropriate for your environment
+
+2. Set up `cookies.json` file for scraper:
+```
+- Navigate to `vmware.slack.com`
+- Click on the "Export cookie json file for Pupeteer" option in the browser extensions
+- Click on "Export cookies as JSON"
+- Ensure that the following file exists: ~/Downloads/app.slack.com.cookies.json
+```
+
+3Test slack scraper:
+```
+export LB_ENDPOINT=$(kubectl get svc postgresml-bitnami-postgresql -n ${DATA_E2E_POSTGRESML_NS} -o jsonpath="{.status.loadBalancer.ingress[0].hostname}");
+export DATA_E2E_LLMAPP_TRAINING_DB_URI=postgresql://postgres:${DATA_E2E_BITNAMI_AUTH_PASSWORD}@${LB_ENDPOINT}:5432/${DATA_E2E_BITNAMI_AUTH_DATABASE};sslmode=allow;
+LLM_DEMO_EMAIL=oawofolu@vmware.com \
+LLM_DEMO_SLACK_ENV_PATH='resources/slack/.env' \
+LLM_DEMO_COOKIES_PATH='~/Downloads/app.slack.com.cookies.json' \
+$(which python3) -c "import os; from app import crawler; crawler.scrape_slack_url(env_file_path=os.environ['LLM_DEMO_SLACK_ENV_PATH'], cookies_file_path=os.environ['LLM_DEMO_COOKIES_PATH'], experiment_name='scraper99999')"
+rm -rf slack/
+```   
 
 ### Deploy Bitnami Postgres on Kubernetes<a name="pg4k8s"/>
 #### Prequisites:

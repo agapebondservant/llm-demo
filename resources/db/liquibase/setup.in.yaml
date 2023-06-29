@@ -11,12 +11,38 @@ data:
     CREATE EXTENSION IF NOT EXISTS vector;
     CREATE EXTENSION IF NOT EXISTS pgml;
 
+    CREATE UNLOGGED TABLE IF NOT EXISTS ${XYZSCHEMA}.vmware_slack_raw (
+      id serial,
+      doc jsonb
+    );
+
     CREATE TABLE IF NOT EXISTS ${XYZSCHEMA}.vmware_doc_scrape_metadata (
       id serial,
+      doc_id bigint NULL,
       url varchar(1000),
       summary text,
       token text,
       e5_large_token_embedding VECTOR(768)
+    );
+
+    CREATE TABLE IF NOT EXISTS ${XYZSCHEMA}.vmware_slack_scrape_metadata (
+          id serial,
+          doc_id bigint NULL,
+          url varchar(1000),
+          summary text,
+          token text,
+          e5_large_token_embedding VECTOR(768)
+        );
+
+    CREATE TABLE IF NOT EXISTS ${XYZSCHEMA}.vmware_slack_scrape_content (
+          id serial,
+          doc_id bigint NULL,
+          post_date varchar(1000),
+          post_time varchar(1000),
+          post_sender varchar(1000),
+          post text,
+          reply text,
+          sentiment varchar(1000)
     );
 
     CREATE OR REPLACE FUNCTION ${XYZSCHEMA}.run_loader_task(
@@ -44,6 +70,76 @@ data:
     END
     '
     LANGUAGE plpgsql;
+
+    CREATE OR REPLACE FUNCTION ${XYZSCHEMA}.run_json_loader_task(
+           url varchar(1000),
+           data text,
+           chunk_size smallint,
+           chunk_overlap smallint)
+        RETURNS INT AS
+        '
+        DECLARE
+        return_count int;
+        BEGIN
+          INSERT INTO ${XYZSCHEMA}.vmware_slack_raw(doc)
+          VALUES(data::jsonb);
+
+          WITH extracted AS (
+              	SELECT id AS extracted_id,
+              	       doc -> ''date''#>> ''{}'' AS extracted_date,
+              		   doc ->''posts''->0->''time''#>> ''{}'' AS extracted_time,
+              		   doc ->''posts''->0->''sender''#>> ''{}'' AS extracted_sender,
+              		   doc->''posts''->0->''text''#>> ''{}'' AS extracted_post,
+               		   jsonb_extract_path(jsonb_array_elements(doc->''posts''->0->''replies''),''text'') #>> ''{}'' AS extracted_reply
+               		   FROM ${XYZSCHEMA}.vmware_slack_raw
+               ),
+               cleaned AS (
+               	SELECT extracted_id AS cleaned_id,
+               	       regexp_replace(extracted_post, ''\s*(<[^>]+>|<script.+?<\/script>|<style.+?<\/style>)\s*'','''',''gi'') AS cleaned_post,
+              		   regexp_replace(extracted_reply, ''\s*(<[^>]+>|<script.+?<\/script>|<style.+?<\/style>)\s*'','''',''gi'') AS cleaned_reply,
+              		   extracted_date AS cleaned_date,
+              		   extracted_time AS cleaned_time,
+              		   extracted_sender AS cleaned_sender
+              		   FROM extracted
+               ),
+               sentiment_analyzed AS (
+               	SELECT cleaned_id AS post_doc_id,
+               	       cleaned_post AS post,
+          	           cleaned_reply AS reply,
+          		       pgml.transform(
+          		   		''{"model": "cardiffnlp/twitter-roberta-base-sentiment"}''::JSONB,
+          		    	inputs => ARRAY[cleaned_reply]
+          		       )::jsonb AS sentiment,
+          	    	   cleaned_date AS post_date,
+          	    	   cleaned_time AS post_time,
+          	    	   cleaned_sender AS post_sender
+          	    	   FROM cleaned
+               ),
+               distinct_posts AS (
+               	SELECT distinct post_doc_id AS distinct_post_doc_id,
+               					post AS distinct_post
+               					FROM sentiment_analyzed
+               ),
+               insert_metadata_table AS (
+                  INSERT INTO vmware_slack_scrape_metadata(doc_id, summary, token)
+               	SELECT  distinct_post_doc_id,
+               			distinct_post ,
+               			pgml.chunk(''recursive_character'',
+                      				distinct_post,
+                      				json_build_object(''chunk_size'',chunk_size,''chunk_overlap'',chunk_overlap)::JSONB)
+               			FROM sentiment_analyzed, distinct_posts
+               			WHERE sentiment_analyzed.post_doc_id = distinct_posts.distinct_post_doc_id
+                  		RETURNING id, doc_id, summary, token
+               )
+          INSERT INTO ${XYZSCHEMA}.vmware_slack_scrape_content(id, doc_id, post, post_date, post_time, post_sender, reply, sentiment)
+              SELECT id, doc_id, summary, post_date, post_time, post_sender, reply, sentiment
+              FROM insert_metadata_table
+              JOIN sentiment_analyzed
+              ON insert_metadata_table.doc_id = sentiment_analyzed.post_doc_id
+              ON CONFLICT DO NOTHING;
+        END
+        '
+        LANGUAGE plpgsql;
 
     CREATE OR REPLACE FUNCTION ${XYZSCHEMA}.run_llm_inference_task(
            question varchar,

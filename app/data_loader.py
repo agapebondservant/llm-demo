@@ -12,7 +12,7 @@ logger.setLevel(logging.INFO)
 load_dotenv()
 
 
-def store_tokens(url_path: str, text: str, experiment_name: str, chunk_size: int = 100, chunk_overlap: int = 5):
+def store_tokens(url_path: str, text: str, experiment_name: str, chunk_size: int = 100, chunk_overlap: int = 5, loader_function_name='run_loader_task'):
     """
     Logs tokens to the MLflow artifact store.
     :param text: Text to be converted and stored as chunks
@@ -20,6 +20,7 @@ def store_tokens(url_path: str, text: str, experiment_name: str, chunk_size: int
     :param experiment_name: Mlflow experiment to associate with this task
     :param chunk_overlap: Number of overlapping tokens to use for splits
     :param chunk_size: Number of tokens per pdf chunk to use for splits
+    :param loader_function_name: Name of the UDF used for loading data into the database
     :return:
     """
     try:
@@ -31,7 +32,6 @@ def store_tokens(url_path: str, text: str, experiment_name: str, chunk_size: int
 
         # GreenplumPython
         db = greenplumpython.database(uri=os.getenv('DATA_E2E_LLMAPP_TRAINING_DB_URI'))
-        loader_function_name, backfill_function_name = 'run_loader_task', 'backfill_embeddings'
 
         ########################################
         # Invoke loader function
@@ -53,7 +53,7 @@ def store_tokens(url_path: str, text: str, experiment_name: str, chunk_size: int
         with mlflow.start_run():
             mlflow.get_experiment_by_name(experiment_name) or mlflow.create_experiment(
                 experiment_name,
-                artifact_location="pdfs",
+                artifact_location="docs",
             )
             os.environ['MLFLOW_EXPERIMENT_NAME'] = experiment_name
             mlflow.set_tags({"embeddable_docs": "y"})

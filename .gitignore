@@ -12,3 +12,4 @@ resources/db/liquibase/embeddings.yaml
 resources/tapworkloads/workload.yaml
 slack-tmp/
 slack/
+resources/db/schemaspy/schemaspy.jar

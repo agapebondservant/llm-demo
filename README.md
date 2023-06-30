@@ -22,12 +22,13 @@ tanzu acc create llm-demo --git-repository https://github.com/agapebondservant/l
 3. [Set up web crawler](#web-crawler)
 4. [Set up Slack crawler](#slack-crawler)
 5. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
-6. [Set up Training and Test Dbs](#traintestdbs)
-7. [Generate embeddings](#embeddings)
-8. [Set up HuggingFace model repo](#huggingfacerepo)
-9. [Integrate HuggingFace model with DataHub](#datahub)
-10. [Set up Other Argo Pipelines](#argopipelines)
-11. [Deploy Demo app](#demoapp)
+6. [Set up SchemaSpy](#schemaspy)
+7. [Set up Training and Test Dbs](#traintestdbs)
+8. [Generate embeddings](#embeddings)
+9. [Set up HuggingFace model repo](#huggingfacerepo)
+10. [Integrate HuggingFace model with DataHub](#datahub)
+11. [Set up Other Argo Pipelines](#argopipelines)
+12. [Deploy Demo app](#demoapp)
 
 ### Install required Python libraries<a name="pythonlib"/>
 Install required Python libraries:
@@ -121,6 +122,13 @@ echo postgresql://postgres:${POSTGRESML_PW}@${POSTGRESML_ENDPOINT}/${DATA_E2E_BI
 4. To delete the Postgres instance:
 ```
 resources/scripts/delete-postgresml-cluster.sh
+```
+
+### Set up SchemaSpy<a name="schemaspy"/>
+1. Download schemaspy:
+```
+curl -L https://github.com/schemaspy/schemaspy/releases/download/v6.2.3/schemaspy-6.2.3.jar \
+--output resources/db/schemaspy/schemaspy.jar
 ```
 
 ### Set up Training and Test Dbs<a name="traintestdbs"/>

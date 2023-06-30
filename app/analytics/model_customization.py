@@ -65,11 +65,11 @@ def publish_model(repo_name: str, pretrained_model_name: str):
         tokenizer.save_pretrained(pretrained_model_name)
 
         os.system(f"cd {repo_name}; "
+                  "git commit -m 'Uploaded pretrained model';"
+                  "git config --global user.email 'tanzuhuggingface@example.com';"
                   f"mv ../{pretrained_model_name}/* .;"
                   f"rm -rf ../{pretrained_model_name}; "
                   "git add .;"
-                  "git commit -m 'Uploaded pretrained model';"
-                  "git config --global user.email 'tanzuhuggingface@example.com';"
                   "git config --global user.name 'Tanzu Huggingface';"
                   f"git push; "
                   f"cd -; rm -rf {repo_name}")

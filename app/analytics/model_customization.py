@@ -50,13 +50,6 @@ def publish_model(repo_name: str, pretrained_model_name: str):
         clone_url = (f"https://tanzuhuggingface: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@huggingface.co/"
                      f"tanzuhuggingface/{repo_name}")
 
-        os.system(f"git clone {clone_url}; "
-                  f"cd {repo_name};"
-                  "git config --global user.email 'tanzuhuggingface@example.com';"
-                  "git config --global user.name 'Tanzu Huggingface';"
-                  f" git lfs install; "
-                  f"huggingface-cli lfs-enable-largefiles .")
-
         model_name = f"tanzuhuggingface/{repo_name}"
 
         print(f"=====================\nSaving model {model_name}...\n=====================\n")
@@ -66,7 +59,12 @@ def publish_model(repo_name: str, pretrained_model_name: str):
         model.save_pretrained(pretrained_model_name)
         tokenizer.save_pretrained(pretrained_model_name)
 
-        os.system(f"cd {repo_name}; "
+        os.system(f"git clone {clone_url}; "
+                  f"cd {repo_name};"
+                  "git config --global user.email 'tanzuhuggingface@example.com';"
+                  "git config --global user.name 'Tanzu Huggingface';"
+                  f" git lfs install; "
+                  f"huggingface-cli lfs-enable-largefiles ."
                   "git commit -m 'Uploaded pretrained model';"
                   f"mv ../{pretrained_model_name}/* .;"
                   f"rm -rf ../{pretrained_model_name}; "

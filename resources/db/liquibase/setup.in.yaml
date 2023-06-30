@@ -223,6 +223,11 @@ data:
         END;
         '
         LANGUAGE plpgsql;
+
+    COMMENT ON FUNCTION ${XYZSCHEMA}.run_loader_task IS 'Loads PDF content into database';
+    COMMENT ON FUNCTION ${XYZSCHEMA}.run_json_loader_task IS 'Loads JSON content into database using Postgres json functions for ELT';
+    COMMENT ON FUNCTION ${XYZSCHEMA}.run_llm_inference_task IS 'Invokes a HuggingFace pipeline using postgresml';
+    COMMENT ON FUNCTION ${XYZSCHEMA}.run_semantic_search IS 'Performs semantic search using pgvector';
 ---
 apiVersion: batch/v1
 kind: Job

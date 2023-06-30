@@ -125,10 +125,27 @@ resources/scripts/delete-postgresml-cluster.sh
 ```
 
 ### Set up SchemaSpy<a name="schemaspy"/>
-1. Download schemaspy:
+1. Download schemaspy and JDBC driver:
 ```
+rm -rf resources/db/schemaspy && mkdir -p resources/db/schemaspy
 curl -L https://github.com/schemaspy/schemaspy/releases/download/v6.2.3/schemaspy-6.2.3.jar \
 --output resources/db/schemaspy/schemaspy.jar
+curl -L https://jdbc.postgresql.org/download/postgresql-42.5.4.jar \
+    --output resources/db/schemaspy/jdbc-driver.jar
+```
+
+2. Generate ERD:
+```
+source .env
+java -jar resources/db/schemaspy/schemaspy.jar \
+    -t pgsql11 \
+    -dp resources/db/schemaspy/jdbc-driver.jar \
+    -db ${DATA_E2E_BITNAMI_AUTH_DATABASE} \
+    -host ${DATA_E2E_LLMAPP_TRAINING_DB_SERVER} \
+    -port 5432 \
+    -u postgres \
+    -p ${DATA_E2E_BITNAMI_AUTH_PASSWORD} \
+    -o resources/db/schemaspy
 ```
 
 ### Set up Training and Test Dbs<a name="traintestdbs"/>

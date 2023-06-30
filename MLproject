@@ -12,7 +12,7 @@ entry_points:
         model-repo: {default: "question-answering-finetuned"}
         platform: {default: "nlp"}
         env: {default: "DEV"}
-        gms-server: {default: "http://datahub-datahub.tanzumlai.com"}
+        gms-server: {default: "http://datahub-gms-datahub.tanzumlai.com"}
         model-description: {default: "Fine-tuned DistilBERT model"}
     command: '$(which python3) -c "from app.analytics import model_customization; import os; model_customization.send_metadata(\"tanzuhuggingface/{model-repo}\",\"{platform}\",\"{env}\",\"{gms-server}\",\"{model-description}\")"'
 

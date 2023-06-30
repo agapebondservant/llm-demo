@@ -65,10 +65,10 @@ def publish_model(repo_name: str, pretrained_model_name: str):
                   "git config --global user.name 'Tanzu Huggingface';"
                   f" git lfs install; "
                   f"huggingface-cli lfs-enable-largefiles .;"
-                  "git add .;"
-                  "git commit -m 'Uploaded pretrained model';"
                   f"mv ../{pretrained_model_name}/* .;"
                   f"rm -rf ../{pretrained_model_name}; "
+                  "git add .;"
+                  "git commit -m 'Uploaded pretrained model';"
                   f"git push; "
                   f"cd -; rm -rf {repo_name}")
 

@@ -9,5 +9,5 @@ login_url: https://onevmw.sharepoint.com
 redirect_url: https://onevmw.sharepoint.com/:f:/r/teams/TSL-v20/Shared%20Documents/Tanzu%20AI%20-%20ML/Demos/LLM%20Demo/docs?csf=1&web=1&e=m67rNF
 selenium_base_image: oawofolu/selenium-python:latest
 
-huggingface_repo: testrepo
+huggingface_repo: nvidia-repo
 huggingface_image: oawofolu/hugging-face-cli:latest

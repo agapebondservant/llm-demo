@@ -30,7 +30,7 @@ nbconvert
 seaborn
 traitlets
 scipy
-# plotly
+plotly
 watchdog
 mpld3
 streamlit==1.18.0
@@ -38,7 +38,7 @@ Pillow
 streamlit-autorefresh
 jupyterflow
 lz4
-pyyaml
+pyyaml==5.3.1
 prometheus-client
 protobuf # protobuf==3.20.0 # protobuf==3.19.5
 fastapi
@@ -59,6 +59,6 @@ python-multipart
 pyservicebinding
 download_and_extract
 altair==4.0
-# sentencepiece
-# urllib3<2
+sentencepiece
+urllib3<2
 .

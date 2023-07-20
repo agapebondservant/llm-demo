@@ -103,6 +103,7 @@ def select_base_llm(prioritized_models: list[str], model_stage: str = 'Productio
     client = MlflowClient()
     for registered_model_name in prioritized_models:
         try:
+            logging.error("Retrieving production model if exists...")
             versions = client.search_model_versions(f"name='{registered_model_name}'")
             if len(versions) and versions[0].current_stage.lower() == 'production':
                 model_name = _llm_model_name_mappings().get(registered_model_name)  # Returns an exception if the model does not exist

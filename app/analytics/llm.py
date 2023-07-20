@@ -3,6 +3,7 @@ import traceback
 import greenplumpython
 from dotenv import load_dotenv
 import os
+import mlflow
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -49,9 +50,26 @@ def run_task(prompt: str,
         url, answer = result["doc_url"], result["result"]
         logger.info(f"Results:\nurl={url}\nresult={answer} ({type(answer)})")
 
+        ########################################
+        # Track prompts
+        ########################################
+        inputs, outputs, prompts = [prompt], [answer], [prompt]
+        track_prompts(inputs, outputs, prompts)
+
         return url, answer
 
     except Exception as ee:
         logger.info("An Exception occurred...", exc_info=True)
         logger.info(str(ee))
         logger.info(''.join(traceback.TracebackException.from_exception(ee).format()))
+
+
+def track_prompts(inputs, outputs, prompts):
+    with mlflow.start_run():
+        try:
+            mlflow.llm.log_predictions(inputs, outputs, prompts)
+        except Exception as ee:
+            logger.info("An Exception occurred...", exc_info=True)
+            logger.info(str(ee))
+            logger.info(''.join(traceback.TracebackException.from_exception(ee).format()))
+

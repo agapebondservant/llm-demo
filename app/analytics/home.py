@@ -94,12 +94,12 @@ with tab2:
     st.markdown("This bot uses <b>on-premise data</b> to provide information about VMware technologies.<br/>",
                 unsafe_allow_html=True)
 
-    question = st.text_input('Your question', '''''')
-    selected_model_name = model_customization.select_base_llm(['tanzuhuggingface-open-llama-7b-open-instruct-GGML', 'tanzuhuggingface-testrepo']) or 'tanzuhuggingface/dev'
+    question, selected_model_name = st.text_input('Your question', ''''''), ''
     if question and question != st.session_state.get('aibot'):
         placeholder2.empty()
         with placeholder2.container():
             with st.spinner('Querying local data...'):
+                selected_model_name = model_customization.select_base_llm(['tanzuhuggingface-open-llama-7b-open-instruct-GGML', 'tanzuhuggingface-testrepo']) or 'tanzuhuggingface/dev'
                 url, answer = llm.run_task(question, task='summarization', model_name=selected_model_name, experiment_name='llm_summary', use_topk='y', inference_function_name='run_semantic_search')
                 st.markdown(f"<div class='card border-light mb-3'>"
                             f"<div class='card-body'><h4 class='card-title'>Matched Documents</h4>"

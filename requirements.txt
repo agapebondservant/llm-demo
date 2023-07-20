@@ -61,5 +61,5 @@ download_and_extract
 altair==4.0
 sentencepiece
 urllib3<2
-git
+GitPython
 .

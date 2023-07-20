@@ -100,15 +100,15 @@ def promote_model_to_staging(model_name, pipeline_name):
 
 
 def select_base_llm(prioritized_models: list[str], model_stage: str = 'Production'):
+    client = MlflowClient()
     for registered_model_name in prioritized_models:
         try:
-            mlflow.pyfunc.load_model(model_uri=f"models:/{registered_model_name}/{model_stage}")  # Returns an exception if the model does not exist
-            model_name = _llm_model_name_mappings().get(registered_model_name)
-            return model_name  # Return the model for the first match in the list
+            versions = client.search_model_versions(f"name='{registered_model_name}'")
+            if len(versions) and versions[0].current_stage.lower() == 'production':
+                model_name = _llm_model_name_mappings().get(registered_model_name)  # Returns an exception if the model does not exist
+                return model_name  # Return the model for the first match in the list
         except Exception as e:
             logging.error(f"Model name={registered_model_name}, stage={model_stage} not found.")
-            logging.info(str(e))
-            logging.info(''.join(traceback.TracebackException.from_exception(e).format()))
 
 
 # TODO: Do not hardcode mappings!!!

@@ -30,7 +30,7 @@ nbconvert
 seaborn
 traitlets
 scipy
-plotly
+# plotly
 watchdog
 mpld3
 streamlit==1.18.0
@@ -59,7 +59,6 @@ python-multipart
 pyservicebinding
 download_and_extract
 altair==4.0
-# protobuf
 # sentencepiece
 # urllib3<2
 .

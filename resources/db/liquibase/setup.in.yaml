@@ -143,7 +143,9 @@ data:
            question varchar,
            task varchar,
            task_model varchar,
-           use_topk boolean default 'y')
+           use_topk boolean default 'y',
+           num_hops smallint default 3,
+           max_new_tokens smallint default 100)
         RETURNS table (
             doc_url varchar,
             result jsonb
@@ -152,11 +154,33 @@ data:
         '
         BEGIN
     		IF use_topk is FALSE THEN
-    			RETURN QUERY
-    			SELECT ''none'', pgml.transform(
-    	            task  => jsonb_build_object(''task'',task,''model'',task_model),
-    	            inputs => ARRAY[question]
-    	        ) AS result;
+                IF task_model = ''TheBloke/open-llama-7b-open-instruct-GGML'' THEN
+    			  RETURN QUERY
+                  WITH RECURSIVE t(n, prompt, answer) AS (
+                      VALUES (1, ''Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n'' || question || ''\n\n### Response:\n'', '''')
+                    UNION ALL
+                      SELECT n+1,
+                      prompt || answer,
+                      answer || (pgml.transform(
+                      task => ''{
+                        "task": "text-generation",
+                        "model": task_model,
+                        "model_type": "llama"
+                      }''::JSONB,
+                      inputs => ARRAY[
+                           prompt
+                      ],
+                      args => ''{"max_new_tokens": max_new_tokens}''::JSONB)->>0)
+                      FROM t WHERE n <= num_hops
+                  )
+                  SELECT ''none'', answer FROM t AS result;
+                ELSE
+                  RETURN QUERY
+                  SELECT ''none'', pgml.transform(
+                      task  => jsonb_build_object(''task'',task,''model'',task_model),
+                      inputs => ARRAY[question]
+                  ) AS result;
+                END IF;
     		ELSE
     	        RETURN QUERY
     	        WITH contexts AS (

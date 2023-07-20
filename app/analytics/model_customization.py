@@ -9,6 +9,9 @@ import os
 import mlflow
 from mlflow import MlflowClient
 from transformers import pipeline
+import mlflow.pyfunc
+import logging
+import traceback
 
 load_dotenv()
 
@@ -94,4 +97,22 @@ def promote_model_to_staging(model_name, pipeline_name):
             version=mv.version,
             stage="Staging"
         )
+
+
+def select_base_llm(prioritized_models: list[str], model_stage: str = 'Production'):
+    for registered_model_name in prioritized_models:
+        try:
+            mlflow.pyfunc.load_model(model_uri=f"models:/{registered_model_name}/{model_stage}")  # Returns an exception if the model does not exist
+            model_name = _llm_model_name_mappings().get(registered_model_name)
+            return model_name  # Return the model for the first match in the list
+        except Exception as e:
+            logging.error(f"Model name={registered_model_name}, stage={model_stage} not found.")
+
+
+# TODO: Do not hardcode mappings!!!
+def _llm_model_name_mappings():
+    return {
+        'tanzuhuggingface-open-llama-7b-open-instruct-GGML': 'TheBloke/open-llama-7b-open-instruct-GGML',
+        'tanzuhuggingface-testrepo': 'tanzuhuggingface/dev'
+    }
 

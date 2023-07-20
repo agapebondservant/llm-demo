@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 from streamlit_autorefresh import st_autorefresh
 import logging
-from app.analytics import llm
+from app.analytics import llm, model_customization
 from io import StringIO
 
 # Initializations
@@ -95,11 +95,12 @@ with tab2:
                 unsafe_allow_html=True)
 
     question = st.text_input('Your question', '''''')
+    selected_model_name = model_customization.select_base_llm(['tanzuhuggingface-open-llama-7b-open-instruct-GGML', 'tanzuhuggingface-testrepo']) or 'tanzuhuggingface/dev'
     if question and question != st.session_state.get('aibot'):
         placeholder2.empty()
         with placeholder2.container():
             with st.spinner('Querying local data...'):
-                url, answer = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary', use_topk='y', inference_function_name='run_semantic_search')
+                url, answer = llm.run_task(question, task='summarization', model_name=selected_model_name, experiment_name='llm_summary', use_topk='y', inference_function_name='run_semantic_search')
                 st.markdown(f"<div class='card border-light mb-3'>"
                             f"<div class='card-body'><h4 class='card-title'>Matched Documents</h4>"
                             f"<p class='card-text' style='font-style:italic;'>\"{answer}...\"</p>"
@@ -113,7 +114,7 @@ with tab2:
                             f"</div></div></div>",
                             unsafe_allow_html=True)
 
-    if question and question != st.session_state.get('aibot'):
+    if question and question != st.session_state.get('aibot') and selected_model_name == 'tanzuhuggingface/dev':
         placeholder3.empty()
         with placeholder3.container():
             with st.spinner('Querying local data with auto-generated embeddings...'):

@@ -27,13 +27,15 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
 # prep for core
 RUN apt-get install -y --no-install-recommends bison build-essential clang flex \
     libopenblas-dev libpython3-dev libreadline-dev libssl-dev pkg-config python3-dev \
-    zlib1g-dev libxml2-dev libxslt-dev libxml2-utils xsltproc ccache \
+    zlib1g-dev protobuf-compiler libxml2-dev libxslt-dev libxml2-utils xsltproc ccache \
     && cd /tmp \
     && git clone https://github.com/postgresml/postgresml \
     && cd postgresml \
     && git submodule update --init --recursive && cd pgml-extension \
     && pip3 install -r requirements.txt \
-    && pip3 install xformers=0.0.20 --no-dependencies
+    && pip3 install xformers==0.0.20 --no-dependencies \
+    && pip3 install protobuf==3.20.1
+
 # core
 RUN cd /tmp/postgresml/pgml-extension \
     && ~/.cargo/bin/cargo install cargo-pgrx --version "0.9.2" --locked \

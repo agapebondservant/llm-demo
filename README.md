@@ -87,7 +87,7 @@ export LB_ENDPOINT=$(kubectl get svc postgresml-bitnami-postgresql -n ${DATA_E2E
 LLM_DEMO_EMAIL=oawofolu@vmware.com \
 LLM_DEMO_SLACK_ENV_PATH='resources/slack/.env' \
 LLM_DEMO_COOKIES_PATH='~/Downloads/app.slack.com.cookies.json' \
-$(which python3) -c "import os; from app import crawler; crawler.scrape_slack_url(env_file_path=os.environ['LLM_DEMO_SLACK_ENV_PATH'], cookies_file_path=os.environ['LLM_DEMO_COOKIES_PATH'], experiment_name='scraper99999')"
+$(which python3) -c "import os; from app import crawler; crawler.scrape_slack_url(env_file_path=os.environ['LLM_DEMO_SLACK_ENV_PATH'], cookies_file_path=os.environ['LLM_DEMO_COOKIES_PATH'], experiment_name='scraper2024')"
 # rm -rf slack/
 ```   
 

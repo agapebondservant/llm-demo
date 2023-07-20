@@ -12,7 +12,7 @@ image:
   repository: ${DATA_E2E_LLM_REGISTRY_USERNAME}/postgresml-bitnami
   tag: ${DATA_E2E_POSTGRESML_IMAGE_TAG}
   debug: true
-  # pullPolicy: Always
+  pullPolicy: Always
 
 primary:
   extendedConfiguration: |
@@ -31,8 +31,8 @@ primary:
       name: cache-dir
 
   initdb:
-    user: "postgres"
-    password: "docker"
+    user: postgres
+    password: docker
     scripts:
       00_init_extensions.sh: |-
         #/bin/bash

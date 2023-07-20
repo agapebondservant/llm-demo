@@ -107,6 +107,8 @@ def select_base_llm(prioritized_models: list[str], model_stage: str = 'Productio
             return model_name  # Return the model for the first match in the list
         except Exception as e:
             logging.error(f"Model name={registered_model_name}, stage={model_stage} not found.")
+            logging.info(str(e))
+            logging.info(''.join(traceback.TracebackException.from_exception(e).format()))
 
 
 # TODO: Do not hardcode mappings!!!

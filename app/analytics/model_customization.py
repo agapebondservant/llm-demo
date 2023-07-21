@@ -105,7 +105,7 @@ def select_base_llm(prioritized_models: list[str], model_stage: str = 'Productio
     for registered_model_name in prioritized_models:
         try:
             logging.error("Retrieving production model if exists...")
-            model_api_uri = f'f{os.getenv("MLFLOW_TRACKING_URI")}/api/2.0/mlflow/registered-models/get?name={registered_model_name}'
+            model_api_uri = f'{os.getenv("MLFLOW_TRACKING_URI")}/api/2.0/mlflow/registered-models/get?name={registered_model_name}'
             models = requests.get(model_api_uri).json()
             model_key = next((x['name'] for x in models['registered_model']['latest_versions'] if x['current_stage'].lower() == 'production'), None)
             if model_key:

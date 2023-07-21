@@ -12,6 +12,8 @@ from transformers import pipeline
 import mlflow.pyfunc
 import logging
 import traceback
+import requests
+import json
 
 load_dotenv()
 
@@ -100,16 +102,15 @@ def promote_model_to_staging(model_name, pipeline_name):
 
 
 def select_base_llm(prioritized_models: list[str], model_stage: str = 'Production'):
-    # client = MlflowClient()
     for registered_model_name in prioritized_models:
         try:
             logging.error("Retrieving production model if exists...")
-            """versions = client.search_model_versions(f"name='{registered_model_name}'")
-            if len(versions) and versions[0].current_stage.lower() == 'production':
-                model_name = _llm_model_name_mappings().get(registered_model_name)  # Returns an exception if the model does not exist
-                return model_name  # Return the model for the first match in the list"""
-            mlflow.pyfunc.load_model(model_uri=f"models:/{registered_model_name}/{model_stage}")  # Returns an exception if the model does not exist
-            return _llm_model_name_mappings()[registered_model_name]  # Return the model for the first match in the list
+            model_api_uri = f'f{os.getenv("MLFLOW_TRACKING_URI")}/api/2.0/mlflow/registered-models/get?name={registered_model_name}'
+            models = requests.get(model_api_uri).json()
+            model_key = next((x['name'] for x in models['registered_model']['latest_versions'] if x['current_stage'].lower() == 'production'), None)
+            if model_key:
+                logging.error(f"Production model found for {registered_model_name}.")
+                return _llm_model_name_mappings().get(model_key)
         except Exception as e:
             logging.error(f"Model name={registered_model_name}, stage={model_stage} not found.")
             logging.info(str(e))

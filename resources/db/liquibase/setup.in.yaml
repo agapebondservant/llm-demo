@@ -154,62 +154,62 @@ data:
         '
         BEGIN
     		IF use_topk is FALSE THEN
+                RETURN QUERY
+                SELECT ''none'', pgml.transform(
+                    task  => jsonb_build_object(''task'',task,''model'',task_model),
+                    inputs => ARRAY[question]
+                ) AS result;
+    		ELSE
                 IF task_model = ''TheBloke/open-llama-7b-open-instruct-GGML'' THEN
-    			  RETURN QUERY
+                  RETURN QUERY
                   WITH RECURSIVE t(n, prompt, answer) AS (
-                      VALUES (1, ''Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n'' || question || ''\n\n### Response:\n'', '''')
-                    UNION ALL
-                      SELECT n+1,
-                      prompt || answer,
-                      answer || (pgml.transform(
-                      task => ''{
-                        "task": "text-generation",
-                        "model": task_model,
-                        "model_type": "llama"
-                      }''::JSONB,
-                      inputs => ARRAY[
-                           prompt
-                      ],
-                      args => ''{"max_new_tokens": max_new_tokens}''::JSONB)->>0)
-                      FROM t WHERE n <= num_hops
-                  )
-                  SELECT ''none'', answer FROM t AS result;
+                       VALUES (1, ''Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n'' || question || ''\n\n### Response:\n'', '''')
+                     UNION ALL
+                       SELECT n+1,
+                       prompt || answer,
+                       answer || (pgml.transform(
+                       task => ''{
+                         "task": "text-generation",
+                         "model": task_model,
+                         "model_type": "llama"
+                       }''::JSONB,
+                       inputs => ARRAY[
+                            prompt
+                       ],
+                       args => ''{"max_new_tokens": max_new_tokens}''::JSONB)->>0)
+                       FROM t WHERE n <= num_hops
+                   )
+                   SELECT ''none'', answer FROM t AS result;
                 ELSE
                   RETURN QUERY
-                  SELECT ''none'', pgml.transform(
+                  WITH contexts AS (
+                      SELECT pgml.embed(''distilbert-base-uncased'', ''query: '' || question)::vector AS context_question
+                  ),
+                  data AS (
+                      SELECT id,
+                      token,
+                      url,
+                      e5_large_token_embedding  AS embedding,
+                      1-(context_question <=> e5_large_token_embedding) AS cosine_similarity
+                      FROM contexts, vmware_doc_scrape_metadata
+                      ORDER BY context_question <=> e5_large_token_embedding
+                      LIMIT 3
+                  ),
+                  summary AS (
+                      SELECT vmware_doc_scrape_metadata.url AS summary_url,
+                      vmware_doc_scrape_metadata.token AS summary_token
+                      FROM vmware_doc_scrape_metadata, data
+                      WHERE vmware_doc_scrape_metadata.id >= data.id-5 AND vmware_doc_scrape_metadata.id < data.id+5
+                      AND vmware_doc_scrape_metadata.url = data.url
+                      ORDER BY vmware_doc_scrape_metadata.id
+                  )
+                  SELECT summary_url, pgml.transform(
                       task  => jsonb_build_object(''task'',task,''model'',task_model),
-                      inputs => ARRAY[question]
-                  ) AS result;
+                      inputs => ARRAY[string_agg(summary_token,'' '' ) ]
+                  ) AS result
+                  FROM summary
+                  GROUP BY summary_url;
                 END IF;
-    		ELSE
-    	        RETURN QUERY
-    	        WITH contexts AS (
-    	            SELECT pgml.embed(''distilbert-base-uncased'', ''query: '' || question)::vector AS context_question
-    	        ),
-    	        data AS (
-    	            SELECT id,
-    	            token,
-    	            url,
-    	            e5_large_token_embedding  AS embedding,
-    	            1-(context_question <=> e5_large_token_embedding) AS cosine_similarity
-    	            FROM contexts, vmware_doc_scrape_metadata
-    	            ORDER BY context_question <=> e5_large_token_embedding
-    	            LIMIT 3
-    	        ),
-    	        summary AS (
-    	            SELECT vmware_doc_scrape_metadata.url AS summary_url,
-    	            vmware_doc_scrape_metadata.token AS summary_token
-    	            FROM vmware_doc_scrape_metadata, data
-    	            WHERE vmware_doc_scrape_metadata.id >= data.id-5 AND vmware_doc_scrape_metadata.id < data.id+5
-    	            AND vmware_doc_scrape_metadata.url = data.url
-    	            ORDER BY vmware_doc_scrape_metadata.id
-    	        )
-    	        SELECT summary_url, pgml.transform(
-    	            task  => jsonb_build_object(''task'',task,''model'',task_model),
-    	            inputs => ARRAY[string_agg(summary_token,'' '' ) ]
-    	        ) AS result
-    	        FROM summary
-    	        GROUP BY summary_url;
     		END IF;
         END;
         '

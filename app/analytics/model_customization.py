@@ -109,8 +109,9 @@ def select_base_llm(prioritized_models: list[str], model_stage: str = 'Productio
             models = requests.get(model_api_uri).json()
             model_key = next((x['name'] for x in models['registered_model']['latest_versions'] if x['current_stage'].lower() == 'production'), None)
             if model_key:
-                logging.error(f"Production model found for {registered_model_name}.")
-                return _llm_model_name_mappings().get(model_key)
+                model_name = _llm_model_name_mappings().get(model_key)
+                logging.error(f"Production model found for {registered_model_name}: {model_name}")
+                return model_name
         except Exception as e:
             logging.error(f"Model name={registered_model_name}, stage={model_stage} not found.")
             logging.info(str(e))

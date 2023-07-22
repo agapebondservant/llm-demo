@@ -30,7 +30,7 @@ def run_task(prompt: str,
     """
     try:
 
-        logger.info(f"Running: {prompt}...")
+        logger.info(f"Running: prompt={prompt}, model={model_name}, use_topk={use_topk}...")
         ####################
         # Store to database
         ###################

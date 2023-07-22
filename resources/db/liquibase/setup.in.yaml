@@ -168,18 +168,18 @@ data:
                        SELECT n+1,
                        prompt || answer,
                        answer || (pgml.transform(
-                       task => ''{
-                         "task": "text-generation",
-                         "model": task_model,
-                         "model_type": "llama"
-                       }''::JSONB,
+                       task => jsonb_build_object(
+                         ''task'', ''text-generation'',
+                         ''model'', task_model,
+                         ''model_type'', ''llama''
+                       ),
                        inputs => ARRAY[
                             prompt
                        ],
-                       args => ''{"max_new_tokens": max_new_tokens}''::JSONB)->>0)
+                       args => jsonb_build_object(''max_new_tokens'', max_new_tokens))->>0)
                        FROM t WHERE n <= num_hops
                    )
-                   SELECT ''none'', answer FROM t AS result;
+                   SELECT ''none''::character varying, jsonb_build_object(''result'', answer) as result FROM t where n = num_hops;
                 ELSE
                   RETURN QUERY
                   WITH contexts AS (

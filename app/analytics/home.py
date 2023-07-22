@@ -100,7 +100,7 @@ with tab2:
         with placeholder2.container():
             with st.spinner('Querying local data...'):
                 selected_model_name = model_customization.select_base_llm(['tanzuhuggingface-open-llama-7b-open-instruct-GGML', 'tanzuhuggingface-testrepo'])
-                url, answer = llm.run_task(question, task='summarization', model_name=selected_model_name, experiment_name='llm_summary', use_topk='y', inference_function_name='run_semantic_search')
+                url, answer = llm.run_task(question, task='summarization', model_name=selected_model_name, experiment_name='llm_summary', use_topk='y')
                 st.markdown(f"<div class='card border-light mb-3'>"
                             f"<div class='card-body'><h4 class='card-title'>Matched Documents</h4>"
                             f"<p class='card-text' style='font-style:italic;'>\"{answer}...\"</p>"

@@ -96,7 +96,7 @@ def scrape_slack_url(env_file_path: str, cookies_file_path: str, experiment_name
     """
 
     # TODO: Use python libraries instead of a subprocess
-    # os.system(f'resources/scripts/scrape-slack.sh {cookies_file_path} ../{env_file_path}')
+    os.system(f'resources/scripts/scrape-slack.sh {cookies_file_path} ../{env_file_path}')
 
     dirpath = 'slack-data'
     files = os.listdir(dirpath)

@@ -111,11 +111,12 @@ def select_base_llm(prioritized_models: list[str], model_stage: str = 'Productio
             if model_key:
                 model_name = _llm_model_name_mappings().get(model_key)
                 logging.error(f"Production model found for {registered_model_name}: {model_name}")
-                return model_name or model_key
+                return model_name
         except Exception as e:
             logging.error(f"Model name={registered_model_name}, stage={model_stage} not found.")
             logging.info(str(e))
             logging.info(''.join(traceback.TracebackException.from_exception(e).format()))
+            return registered_model_name
 
 
 # TODO: Do not hardcode mappings!!!

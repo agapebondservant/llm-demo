@@ -102,6 +102,8 @@ def promote_model_to_staging(model_name, pipeline_name):
 
 
 def select_base_llm(prioritized_models: list[str], model_stage: str = 'Production'):
+    default_model = _llm_model_name_mappings().get(prioritized_models[-1])
+
     for registered_model_name in prioritized_models:
         try:
             logging.error("Retrieving production model if exists...")
@@ -116,7 +118,8 @@ def select_base_llm(prioritized_models: list[str], model_stage: str = 'Productio
             logging.error(f"Model name={registered_model_name}, stage={model_stage} not found.")
             logging.info(str(e))
             logging.info(''.join(traceback.TracebackException.from_exception(e).format()))
-            return registered_model_name
+            
+    return default_model
 
 
 # TODO: Do not hardcode mappings!!!

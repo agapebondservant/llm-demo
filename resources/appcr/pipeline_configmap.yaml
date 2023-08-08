@@ -6,7 +6,7 @@ metadata:
     workflows.argoproj.io/configmap-type: Parameter
 data:
   llm_token: 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
-  postgresml_uri: postgresql://postgres:docker@aa2d08b37a31140b8a4d7fb7a61916fe-1640975247.us-east-1.elb.amazonaws.com/postgresml
+  postgresml_uri: postgresql://postgres:docker@acc5c61d88fe945618de511e6f50bfc3-1038774670.us-east-1.elb.amazonaws.com/postgresml
   generate_embeddings.sql: |
     DO $$
     BEGIN

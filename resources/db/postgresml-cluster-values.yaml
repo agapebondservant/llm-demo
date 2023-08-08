@@ -39,6 +39,9 @@ primary:
         echo "Setting huggingface cache directory..."
         ls -ltra /opt/cache
 
+  persistence:
+    size: 16Gi
+
   extraEnvVars:
     - name: HF_HOME
       value: /opt/cache

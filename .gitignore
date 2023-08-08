@@ -14,3 +14,4 @@ slack-tmp/
 slack/
 resources/db/schemaspy/*.jar
 resources/db/schemaspy/
+driver/

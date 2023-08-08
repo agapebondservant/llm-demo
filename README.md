@@ -21,14 +21,15 @@ tanzu acc create llm-demo --git-repository https://github.com/agapebondservant/l
 2. [Set up access control/credentials](#accesscontrol)
 3. [Set up web crawler](#web-crawler)
 4. [Set up Slack crawler](#slack-crawler)
-5. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
-6. [Set up SchemaSpy](#schemaspy)
-7. [Set up Training and Test Dbs](#traintestdbs)
-8. [Generate embeddings](#embeddings)
-9. [Set up HuggingFace model repo](#huggingfacerepo)
-10. [Integrate HuggingFace model with DataHub](#datahub)
-11. [Set up Other Argo Pipelines](#argopipelines)
-12. [Deploy Demo app](#demoapp)
+5. [Set up vGPU integration](#vgpu)
+6. [Deploy Bitnami Postgres on Kubernetes](#pg4k8s)
+7. [Set up SchemaSpy](#schemaspy)
+8. [Set up Training and Test Dbs](#traintestdbs)
+9. [Generate embeddings](#embeddings)
+10. [Set up HuggingFace model repo](#huggingfacerepo)
+11. [Integrate HuggingFace model with DataHub](#datahub)
+12. [Set up Other Argo Pipelines](#argopipelines)
+13. [Deploy Demo app](#demoapp)
 
 ### Install required Python libraries<a name="pythonlib"/>
 Install required Python libraries:
@@ -89,7 +90,45 @@ LLM_DEMO_SLACK_ENV_PATH='resources/slack/.env' \
 LLM_DEMO_COOKIES_PATH='~/Downloads/app.slack.com.cookies.json' \
 $(which python3) -c "import os; from app import crawler; crawler.scrape_slack_url(env_file_path=os.environ['LLM_DEMO_SLACK_ENV_PATH'], cookies_file_path=os.environ['LLM_DEMO_COOKIES_PATH'], experiment_name='scraper2024')"
 # rm -rf slack/
-```   
+```  
+
+### Set up vGPU integration<a name="vgpu"/>
+1. Switch Kubernetes context to the management cluster
+```
+kubectl config use-context <your-database-cluster-name>-admin@<your-database-cluster-name>
+export WORKER_NODE_NM=$(kubectl get nodes -l '!node-role.kubernetes.io/control-plane' -oname)
+kubectl label $WORKER_NODE_NM feature.node.kubernetes.io/pci-10de.present=true
+```
+
+2. Apply the NVIDIA GPU helm chart:
+```
+helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+helm repo update
+helm install  --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator
+```
+
+3. Verify that the new pods are successfully added 
+(should see **gpu-operator-** pods and **nvidia-**  pods in the default namespace):
+```
+watch kubectl get pods -n gpu-operator
+```
+
+4. Verify that the new installation can run a sample GPU application (logs should show **Test passed**):
+```
+kubectl apply -f resources/gpu/cuda-vector-add.yaml
+watch kubectl get pod cuda-vector-add # wait until Pod Status = "Ready"
+kubectl logs cuda-vector-add
+```
+
+5. Clean up GPU Application test:
+```
+kubectl delete -f resources/gpu/cuda-vector-add.yaml
+```
+
+6. To delete the GPU operator resources:
+```
+helm uninstall -n gpu-operator
+```
 
 ### Deploy Bitnami Postgres on Kubernetes<a name="pg4k8s"/>
 #### Prequisites:

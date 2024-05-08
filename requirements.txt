@@ -54,7 +54,7 @@ hickle
 python-multipart
 evidently
 pysqlite3-binary
-kfp==1.8.19
+kfp==2.5.0
 python-multipart
 pyservicebinding
 download_and_extract
@@ -62,4 +62,6 @@ altair==4.0
 sentencepiece
 urllib3<2
 GitPython
+pydantic==2.6.0
+tf-keras
 .

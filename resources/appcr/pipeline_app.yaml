@@ -13,6 +13,7 @@ spec:
     - ytt:
         paths:
           - resources/appcr/pipeline.yaml
+          - resources/appcr/job.yaml
           - resources/appcr/values.yaml
           - .git/refs/heads/main
 

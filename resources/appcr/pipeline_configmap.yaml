@@ -5,7 +5,7 @@ metadata:
   labels:
     workflows.argoproj.io/configmap-type: Parameter
 data:
-  llm_token: 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
+  llm_token: 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
   postgresml_uri: postgresql://postgres:docker@acc5c61d88fe945618de511e6f50bfc3-1038774670.us-east-1.elb.amazonaws.com/postgresml
   generate_embeddings.sql: |
     DO $$
@@ -69,10 +69,10 @@ data:
     echo "Creating custom huggingface repo...$1"
     pip3 install huggingface_hub[cli] transformers --break-system-packages
     export PATH=/root/.local/bin:/Users/oawofolu/Downloads/google-cloud-sdk/bin:/opt/local/bin:/opt/local/sbin:/Users/oawofolu/.asdf/shims:/usr/local/opt/asdf/libexec/bin:/Users/oawofolu/.pyenv/shims:/Users/oawofolu/.pyenv/shims:/Users/oawofolu/.pyenv/bin:/Users/oawofolu/opt/anaconda3/bin:/Users/oawofolu/opt/anaconda3/condabin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/share/dotnet:/opt/X11/bin:~/.dotnet/tools:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/oawofolu/PIVOTAL/vmware-gemfire-10.0.0/bin:/usr/local/Cellar/maven/3.6.1/libexec/bin:/Users/oawofolu/PIVOTAL/installs/kafka/kafka_2.12-2.5.0/bin:/usr/local/Cellar/openjdk/13.0.2+8_2/libexec/openjdk.jdk/Contents/Home/bin:/Applications/Docker.app/Contents/Resources/bin
-    huggingface-cli login --token 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
+    huggingface-cli login --token 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
     huggingface-cli repo create $1 --type model -y
     git lfs install
-    git clone https://tanzuhuggingface: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@huggingface.co/tanzuhuggingface/$1
+    git clone https://tanzuhuggingface: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@huggingface.co/tanzuhuggingface/$1
     cd $1
     huggingface-cli lfs-enable-largefiles .
     wget https://raw.githubusercontent.com/agapebondservant/llm-demo/main/resources/huggingface/README.md

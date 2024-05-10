@@ -183,7 +183,7 @@ data:
                 ELSE
                   RETURN QUERY
                   WITH contexts AS (
-                      SELECT pgml.embed(''distilbert-base-uncased'', ''query: '' || question)::vector AS context_question
+                      SELECT pgml.embed(''distilbert-base-uncased'', ''query: '' || question, ''{''device'': ''cuda:0''}'')::vector AS context_question
                   ),
                   data AS (
                       SELECT id,

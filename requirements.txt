@@ -11,7 +11,7 @@ transformers
 python-dotenv
 langchain
 tiktoken
-webdriver-manager
+git+https://github.com/SergeyPirogov/webdriver_manager@master #webdriver-manager
 mlflow==2.4.1
 greenplum-python
 torchvision

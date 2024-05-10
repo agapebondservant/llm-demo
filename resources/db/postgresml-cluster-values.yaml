@@ -3,16 +3,26 @@ global:
     nameOverride: postgresml
     storageClass: generic
     auth:
-      postgresPassword: ${DATA_E2E_BITNAMI_AUTH_POSTGRESPASSWORD}
+      # postgresPassword: ${DATA_E2E_BITNAMI_AUTH_POSTGRESPASSWORD}
       username: ${DATA_E2E_BITNAMI_AUTH_USERNAME}
       password: ${DATA_E2E_BITNAMI_AUTH_PASSWORD}
       database: ${DATA_E2E_BITNAMI_AUTH_DATABASE}
+
+commonLabels:
+  backstage-dashboard-category: postgres
+  backstage-dashboard-name: postgres-genai
+  backstage-dashboard-type: service
+
+fullnameOverride: ${DATA_E2E_BITNAMI_INSTANCE_NAME}
 
 image:
   repository: ${DATA_E2E_LLM_REGISTRY_USERNAME}/postgresml-bitnami
   tag: ${DATA_E2E_POSTGRESML_IMAGE_TAG}
   debug: true
   pullPolicy: Always
+
+serviceBindings:
+  enabled: true
 
 primary:
   extendedConfiguration: |
@@ -29,6 +39,11 @@ primary:
   extraVolumeMounts:
     - mountPath: /opt/cache
       name: cache-dir
+
+#  resources:
+#    limits:
+#      nvidia.com/gpu: 1
+
 
   initdb:
     user: postgres

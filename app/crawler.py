@@ -19,7 +19,7 @@ options = Options()
 options.add_argument("--no-sandbox")
 # options.add_argument("--headless=new")
 options.add_argument("--disable-gpu")
-driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="114.0.5735.90").install()), options=options)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager(driver_version="124.0.6367.156").install()), options=options)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())

@@ -52,7 +52,7 @@ def ingest_metadata_from_huggingface_model(model_name: str):
 def publish_model(repo_name: str, pretrained_model_name: str):
     with mlflow.start_run(run_name='publish_model', nested=True):
         # TODO: DO NOT HARDCODE!!!
-        clone_url = (f"https://tanzuhuggingface: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@huggingface.co/"
+        clone_url = (f"https://tanzuhuggingface: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@huggingface.co/"
                      f"tanzuhuggingface/{repo_name}")
 
         model_name = f"tanzuhuggingface/{repo_name}"

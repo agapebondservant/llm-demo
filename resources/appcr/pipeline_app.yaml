@@ -14,6 +14,7 @@ spec:
         paths:
           - resources/appcr/pipeline.yaml
           - resources/appcr/values.yaml
+          - .git/refs/heads/main
 
   deploy:
     - kapp: {}

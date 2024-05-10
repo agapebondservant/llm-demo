@@ -4,6 +4,9 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   name: llm-image-processing-workflow
+  annotations:
+    kapp.k14s.io/change-group: "apps.big.co/llm-argo-pipelines"
+    kapp.k14s.io/disable-original: ""
 spec:
   entrypoint: train
   volumes:

@@ -12,7 +12,7 @@ python-dotenv
 langchain
 tiktoken
 git+https://github.com/SergeyPirogov/webdriver_manager@master #webdriver-manager
-mlflow==2.4.1
+mlflow==2.12.2
 greenplum-python
 torchvision
 accelerate

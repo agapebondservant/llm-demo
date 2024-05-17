@@ -13,3 +13,21 @@ accelerator:
   - "LLMOps"
   - "LLM"
   - "mlflow"
+  - "sample"
+  - "pipeline"
+  options:
+    - name: llmHuggingFaceRepo
+      inputType: text
+      display: true
+      label: 'Hugging Face Repository: Target HuggingFace Repo'
+engine:
+  type: Merge
+  sources:
+    - type: Chain
+      transformations:
+        - type: Include
+          patterns: [ 'resources/**' ]
+        - type: ReplaceText
+          substitutions:
+            - text: LLM_HUGGINGFACE_REPO
+              with: "#llmHuggingFaceRepo"

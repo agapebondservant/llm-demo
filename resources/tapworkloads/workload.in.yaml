@@ -10,7 +10,6 @@ metadata:
   annotations:
     autoscaling.knative.dev/minScale: "1"
 spec:
-  #image: index.docker.io/oawofolu/image-processor-default@sha256:ba3df083e2abf17117488d918ba2321ec7ba9999981077416725cb3f34b09c6e
   params:
     - name: clusterBuilder
       value: full
@@ -22,8 +21,9 @@ spec:
     - name: GIT_PYTHON_REFRESH
       value: quiet
     - name: DATA_E2E_LLMAPP_TRAINING_DB_URI
-      # TODO: Use External Secrets / Vault!
-      value: ${DATA_E2E_LLMAPP_TRAINING_DB_URI}
+      value: ${DATA_E2E_LLMAPP_TRAINING_DB_URI} # TODO: Use External Secrets / Vault!
+    - name: DATA_E2E_HUGGINGFACE_TOKEN
+      value: ${DATA_E2E_HUGGINGFACE_TOKEN} # TODO: Use External Secrets / Vault!
   source:
     git:
       url: https://github.com/agapebondservant/llm-demo.git

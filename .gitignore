@@ -5,6 +5,7 @@ dev/
 resources/db/liquibase/setup.yaml
 resources/argo/values.yaml
 resources/argo/pipeline*.yaml
+resources/appcr/pipeline_configmap.yaml
 pdfs
 tmp*.*
 test.sql

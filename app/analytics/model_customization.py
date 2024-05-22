@@ -13,7 +13,7 @@ import mlflow.pyfunc
 import logging
 import traceback
 import requests
-import json
+from app.analytics import config
 
 load_dotenv()
 
@@ -51,10 +51,6 @@ def ingest_metadata_from_huggingface_model(model_name: str):
 
 def publish_model(repo_name: str, pretrained_model_name: str):
     with mlflow.start_run(run_name='publish_model', nested=True):
-        # TODO: DO NOT HARDCODE!!!
-        clone_url = (f"https://tanzuhuggingface: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@huggingface.co/"
-                     f"tanzuhuggingface/{repo_name}")
-
         model_name = f"tanzuhuggingface/{repo_name}"
 
         print(f"=====================\nSaving model {model_name}...\n=====================\n")
@@ -63,24 +59,13 @@ def publish_model(repo_name: str, pretrained_model_name: str):
         tokenizer = TFDistilBertForQuestionAnswering.from_pretrained(pretrained_model_name)
         model.save_pretrained(pretrained_model_name)
         tokenizer.save_pretrained(pretrained_model_name)
-
-        os.system(f"git clone {clone_url}; "
-                  f"cd {repo_name};"
-                  "git config --global user.email 'tanzuhuggingface@example.com';"
-                  "git config --global user.name 'Tanzu Huggingface';"
-                  f" git lfs install; "
-                  f"huggingface-cli lfs-enable-largefiles .;"
-                  f"mv ../{pretrained_model_name}/* .;"
-                  f"rm -rf ../{pretrained_model_name}; "
-                  "git add .;"
-                  "git commit -m 'Uploaded pretrained model';"
-                  f"git push; "
-                  f"cd -; rm -rf {repo_name}")
+        model.push_to_hub(model_name, max_shard_size='2GB', use_auth_token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))
+        tokenizer.push_to_hub(model_name, use_auth_token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))
 
 
 def promote_model_to_staging(model_name, pipeline_name):
 
-    # TODO: Determine correct version
+    # TODO: Determine correct version to update
     with mlflow.start_run(run_name='promote_model_to_staging', nested=True) as run:
         client = MlflowClient()
 
@@ -94,38 +79,37 @@ def promote_model_to_staging(model_name, pipeline_name):
         client.create_registered_model(registered_model_name)
         model_uri = f"runs:/{run.info.run_id}/{pipeline_name}"
         mv = client.create_model_version(registered_model_name, model_uri, run.info.run_id)
-        client.transition_model_version_stage(
-            name=registered_model_name,
+
+        # Promote to staging
+        client.copy_model_version(
+            src_model_uri=f"models:/{registered_model_name}/{mv.version}",
+            dst_name=f"{registered_model_name}-staging",
+        )
+
+        # Set up alias
+        client.set_registered_model_alias(
+            name=f"{registered_model_name}-staging",
+            alias="champion",
             version=mv.version,
-            stage="Staging"
         )
 
 
-def select_base_llm(prioritized_models: list[str], model_stage: str = 'Production'):
-    default_model = _llm_model_name_mappings().get(prioritized_models[-1])
+def select_base_llm():
+    # If a default LLM exists in the model registry, return it
+    try:
+        logging.info("Retrieving default production model from ML registry if exists...")
+        model_name = f"{config.model_name}-{config.model_stage.lower()}"
+        model_api_uri = f'{os.getenv("MLFLOW_TRACKING_URI")}/api/2.0/mlflow/registered-models/alias?name={model_name}&alias={config.model_alias}'
+        models = requests.get(model_api_uri).json()
+        if 'model_version' in models:
+            return config.model_name
+    except Exception as e:
+        logging.error(f"Registered model name={model_name}, alias={config.model_alias} not found.")
+        logging.info(str(e))
+        logging.info(''.join(traceback.TracebackException.from_exception(e).format()))
 
-    for registered_model_name in prioritized_models:
-        try:
-            logging.error("Retrieving production model if exists...")
-            model_api_uri = f'{os.getenv("MLFLOW_TRACKING_URI")}/api/2.0/mlflow/registered-models/get?name={registered_model_name}'
-            models = requests.get(model_api_uri).json()
-            model_key = next((x['name'] for x in models['registered_model']['latest_versions'] if x['current_stage'].lower() == 'production'), None)
-            if model_key:
-                model_name = _llm_model_name_mappings().get(model_key)
-                logging.error(f"Production model found for {registered_model_name}: {model_name}")
-                return model_name
-        except Exception as e:
-            logging.error(f"Model name={registered_model_name}, stage={model_stage} not found.")
-            logging.info(str(e))
-            logging.info(''.join(traceback.TracebackException.from_exception(e).format()))
+    # Else, return a predefined default model
+    default_model = config.fallback_model_name
             
     return default_model
-
-
-# TODO: Do not hardcode mappings!!!
-def _llm_model_name_mappings():
-    return {
-        'tanzuhuggingface-open-llama-7b-open-instruct-GGML': 'TheBloke/open-llama-7b-open-instruct-GGML',
-        'tanzuhuggingface-testrepo': 'tanzuhuggingface/dev'
-    }
 

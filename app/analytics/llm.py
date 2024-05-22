@@ -53,8 +53,8 @@ def run_task(prompt: str,
         ########################################
         # Track prompts
         ########################################
-        inputs, outputs, prompts = [prompt], [answer], [prompt]
-        track_prompts(inputs, outputs, prompts)
+        inputs, outputs = [prompt], [answer]
+        track_prompts(inputs, outputs)
 
         return url, answer
 
@@ -64,10 +64,10 @@ def run_task(prompt: str,
         logger.info(''.join(traceback.TracebackException.from_exception(ee).format()))
 
 
-def track_prompts(inputs, outputs, prompts):
+def track_prompts(inputs, outputs):
     with mlflow.start_run():
         try:
-            mlflow.llm.log_predictions(inputs, outputs, prompts)
+            mlflow.log_table(data={"inputs": inputs, "outputs": outputs}, artifact_file="prompt_tracking.json")
         except Exception as ee:
             logger.info("An Exception occurred...", exc_info=True)
             logger.info(str(ee))

@@ -4,6 +4,7 @@ import greenplumpython
 from dotenv import load_dotenv
 import os
 import mlflow
+import json
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -53,8 +54,9 @@ def run_task(prompt: str,
         ########################################
         # Track prompts
         ########################################
-        inputs, outputs = [prompt], [answer]
-        track_prompts(inputs, outputs)
+        track_prompts(model_name,
+                      [prompt],
+                      [json.dumps(answer)])
 
         return url, answer
 
@@ -64,10 +66,15 @@ def run_task(prompt: str,
         logger.info(''.join(traceback.TracebackException.from_exception(ee).format()))
 
 
-def track_prompts(inputs, outputs):
+def track_prompts(model_name, inputs, outputs):
     with mlflow.start_run():
         try:
-            mlflow.log_table(data={"inputs": inputs, "outputs": outputs}, artifact_file="prompt_tracking.json")
+            experiment_name = 'llm_inference_tracking'
+            mlflow.get_experiment_by_name(experiment_name) or mlflow.create_experiment(
+                experiment_name,
+            )
+            os.environ['MLFLOW_EXPERIMENT_NAME'] = experiment_name
+            mlflow.log_table(data={"model": model_name, "inputs": inputs, "outputs": outputs}, artifact_file="prompt_tracking.json")
         except Exception as ee:
             logger.info("An Exception occurred...", exc_info=True)
             logger.info(str(ee))

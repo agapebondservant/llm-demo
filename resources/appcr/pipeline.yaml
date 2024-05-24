@@ -17,18 +17,24 @@ spec:
   templates:
     - name: train
       steps:
-        - - name: publish-model
+        - - name: upload-dataset
             template: run-training
             arguments:
               parameters:
                 - name: mlflow_entry
-                  value: "publish_model"
-        - - name: send-metadata
+                  value: "upload_dataset"
+        - - name: train-model
             template: run-training
             arguments:
               parameters:
                 - name: mlflow_entry
-                  value: "send_metadata"
+                  value: "train_model"
+        - - name: evaluate-model
+            template: run-training
+            arguments:
+              parameters:
+                - name: mlflow_entry
+                  value: "evaluate_model"
         - - name: promote-model-to-staging
             template: run-training
             arguments:

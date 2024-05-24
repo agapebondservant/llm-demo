@@ -86,7 +86,7 @@ def promote_model_to_staging(model_name, pipeline_name):
         mv = client.create_model_version(registered_model_name, model_uri, run.info.run_id)
 
         # Promote to staging
-        client.copy_model_version(
+        mv_copy = client.copy_model_version(
             src_model_uri=f"models:/{registered_model_name}/{mv.version}",
             dst_name=f"{registered_model_name}-staging",
         )
@@ -95,7 +95,7 @@ def promote_model_to_staging(model_name, pipeline_name):
         client.set_registered_model_alias(
             name=f"{registered_model_name}-staging",
             alias="champion",
-            version=mv.version,
+            version=mv_copy.version,
         )
 
 

@@ -3,7 +3,7 @@ import datahub.metadata.schema_classes as models
 from datahub.emitter.mcp import MetadataChangeProposalWrapper
 from datahub.emitter.rest_emitter import DatahubRestEmitter
 from huggingface_hub import ModelCard
-from transformers import AutoModel, AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoModel, AutoTokenizer, AutoModelForCausalLM, TFAutoModelForQuestionAnswering
 from dotenv import load_dotenv
 import os
 import mlflow
@@ -61,7 +61,7 @@ def publish_model(repo_name: str, pretrained_model_name: str):
 
         logging.info(f"=====================\nSaving model {model_name}...\n=====================\n")
         tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name)
-        model = AutoModel.from_pretrained(pretrained_model_name)
+        model = AutoModelForCausalLM.from_pretrained(pretrained_model_name)
         model.save_pretrained(pretrained_model_name)
         tokenizer.save_pretrained(pretrained_model_name)
         model.push_to_hub(model_name, max_shard_size='2GB', token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))

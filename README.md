@@ -285,17 +285,20 @@ kubectl apply -f resources/argo/argo-workflow-rbac.yaml -nargo
 kubectl -n argo exec $(kubectl get pod -n argo -l 'app=argo-server' -o jsonpath='{.items[0].metadata.name}') -- argo auth token
 ```
 
-3. Set up GitOps sync hook with kappcontroller's App CR:
+3. Set up Configmaps that will be leveraged by the pipelines (as an enhancement, use ExternalSecrets or SealedSecrets instead):
 ```
 source .env
 envsubst < resources/appcr/pipeline_configmap.in.yaml > resources/appcr/pipeline_configmap.yaml
-# kubectl delete -f resources/appcr/pipeline_configmap.yaml -n argo
-# kubectl apply -f resources/appcr/pipeline_configmap.yaml -n argo
-kapp deploy -a huggingface-tanzudev-configmap-monitor-<THE PIPELINE ENVIRONMENT> -f resources/appcr/pipeline_configmap_app.yaml --logs -y  -nargo
+kubectl delete -f resources/appcr/pipeline_configmap.yaml -n argo
+kubectl apply -f resources/appcr/pipeline_configmap.yaml -n argo
+```
+
+4. Set up GitOps sync hook with kappcontroller's App CR:
+```
 kapp deploy -a huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -f resources/appcr/pipeline_app.yaml --logs -y  -nargo
 ```
 
-4. View progress:
+5. View progress:
 ```
 kubectl get app huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -oyaml  -nargo
 ```
@@ -303,7 +306,6 @@ kubectl get app huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -oyaml  
 * To delete the pipeline:
 ```
 kapp delete -a huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -y -nargo
-kapp delete -a huggingface-tanzudev-configmap-monitor-<THE PIPELINE ENVIRONMENT> -y -nargo
 ```
 
 ### Set up other Argo Pipelines<a name="argopipelines"/>

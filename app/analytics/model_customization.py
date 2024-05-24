@@ -81,8 +81,8 @@ def promote_model_to_staging(model_name, pipeline_name):
         )
 
         registered_model_name = model_name.replace('/', '-')
-        client.create_registered_model(registered_model_name)
         model_uri = f"runs:/{run.info.run_id}/{pipeline_name}"
+        client.register_model(model_uri, registered_model_name)
         mv = client.create_model_version(registered_model_name, model_uri, run.info.run_id)
 
         # Promote to staging

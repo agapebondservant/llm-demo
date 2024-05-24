@@ -342,7 +342,7 @@ docker push ${DATA_E2E_LLM_REGISTRY_USERNAME}/hugging-face-cli:latest
 cd -
 ```
 
-5. Set up huggingface setup pipeline: (after updating `huggingface_repo` in the `resources/appcr/values.yaml` file as appropriate):
+5. Set up huggingface setup pipeline:
 ```
 ytt -f resources/appcr/pipeline_create_huggingfacerepo.yaml -f resources/appcr/values-other.yaml | kubectl delete -n argo -f -
 ytt -f resources/appcr/pipeline_create_huggingfacerepo.yaml -f resources/appcr/values-other.yaml | kubectl apply -n argo -f -

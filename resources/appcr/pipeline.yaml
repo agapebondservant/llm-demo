@@ -53,8 +53,6 @@ spec:
             value: #@ data.values.experiment_name
           - name: environment_name
             value: #@ data.values.environment_name
-          - name: model_repo
-            value: #@ data.values.huggingface_repo
       container:
         image: oawofolu/llm-image-processor
         command: [ python ]
@@ -71,4 +69,3 @@ spec:
           - git_repo="{{inputs.parameters.git_repo}}"
           - experiment_name="{{inputs.parameters.experiment_name}}"
           - environment_name="{{inputs.parameters.environment_name}}"
-          - model_repo="{{inputs.parameters.model_repo}}"

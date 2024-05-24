@@ -17,8 +17,6 @@ spec:
   templates:
     - name: train
       steps:
-        - - name: create-custom-model-repo
-            template: create-repo
         - - name: publish-model
             template: run-training
             arguments:

@@ -103,7 +103,7 @@ with tab2:
                 url, answer = llm.run_task(question, task='summarization', model_name=selected_model_name, experiment_name='llm_summary', use_topk='y')
                 st.markdown(f"<div class='card border-light mb-3'>"
                             f"<div class='card-body'><h5 class='card-title'>Model Name</h5>"
-                            f"<p class='card-text'>{selected_model_name}</p></div></div>",
+                            f"<p class='card-text'>{selected_model_name}</p></div></div>"
                             f"<div class='card border-light mb-3'>"
                             f"<div class='card-body'><h4 class='card-title'>Matched Documents</h4>"
                             f"<p class='card-text' style='font-style:italic;'>\"{answer}...\"</p>"
@@ -124,7 +124,7 @@ with tab2:
                 _, summary = llm.run_task(question, task='summarization', model_name='tanzuhuggingface/dev', experiment_name='llm_summary')
                 st.markdown(f"<div class='card border-light mb-3'>"
                             f"<div class='card-body'><h5 class='card-title'>Model Name</h5>"
-                            f"<p class='card-text'>tanzuhuggingface/dev</p></div></div>",
+                            f"<p class='card-text'>tanzuhuggingface/dev</p></div></div>"
                             f"<div class='card border-light mb-3'>"
                             f"<div class='card-body'><h4 class='card-title'>Summary</h4>"
                             f"<p class='card-text'>{summary}</p>"

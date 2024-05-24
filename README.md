@@ -285,12 +285,15 @@ kubectl apply -f resources/argo/argo-workflow-rbac.yaml -nargo
 kubectl -n argo exec $(kubectl get pod -n argo -l 'app=argo-server' -o jsonpath='{.items[0].metadata.name}') -- argo auth token
 ```
 
-3. Set up Configmaps that will be leveraged by the pipelines (as an enhancement, use ExternalSecrets or SealedSecrets instead):
+3. Set up Configmaps and Secrets that will be leveraged by the pipelines (requires SealedSecrets - see <a href="https://github.com/bitnami-labs/sealed-secrets" target="_blank">link</a>)
 ```
 source .env
 envsubst < resources/appcr/pipeline_configmap.in.yaml > resources/appcr/pipeline_configmap.yaml
 kubectl delete -f resources/appcr/pipeline_configmap.yaml -n argo
 kubectl apply -f resources/appcr/pipeline_configmap.yaml -n argo
+kubectl create secret generic huggingface-token --from-literal=token=${DATA_E2E_HUGGINGFACE_TOKEN} --dry-run=client -o yaml > llm-huggingface-token-secret.yaml
+kubeseal --scope cluster-wide -o yaml <llm-huggingface-token-secret.yaml> resources/appcr/llm-huggingface-token-sealedsecret.yaml
+kubectl apply -f resources/appcr/llm-huggingface-token-sealedsecret.yaml -nargo
 ```
 
 4. Set up GitOps sync hook with kappcontroller's App CR:

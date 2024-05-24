@@ -37,17 +37,6 @@ spec:
               parameters:
                 - name: mlflow_entry
                   value: "promote_model_to_staging"
-        - - name: deploy-to-edge
-            template: deploy-db
-    - name: deploy-db
-      container:
-        image: docker/whalesay
-        command: [ cowsay ]
-        args: [ "This task will be responsible for migrating embeddings to edge DB instances" ]
-        resources:
-          limits:
-            memory: 32Mi
-            cpu: 100m
     - name: run-training
       inputs:
         parameters:
@@ -65,6 +54,12 @@ spec:
       container:
         image: oawofolu/llm-image-processor
         command: [ python ]
+        env:
+          - name: DATA_E2E_HUGGINGFACE_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: huggingface-token
+                key: token
         args:
           - ./app/main.py
           - mlflow_entry="{{inputs.parameters.mlflow_entry}}"
@@ -73,18 +68,3 @@ spec:
           - experiment_name="{{inputs.parameters.experiment_name}}"
           - environment_name="{{inputs.parameters.environment_name}}"
           - model_repo="{{inputs.parameters.model_repo}}"
-    - name: create-repo
-      inputs:
-        parameters:
-          - name: huggingface_repo
-            value: #@ data.values.huggingface_repo
-      container:
-        image: #@ data.values.huggingface_image
-        imagePullPolicy: Always
-        command: [ /bin/sh ]
-        args:
-          - -c
-          - /usr/local/create_custom_huggingface_repo.sh "{{inputs.parameters.huggingface_repo}}"
-        volumeMounts:
-          - name: huggingface-repo-volume
-            mountPath: /usr/local

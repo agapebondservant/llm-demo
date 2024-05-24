@@ -3,7 +3,7 @@ import datahub.metadata.schema_classes as models
 from datahub.emitter.mcp import MetadataChangeProposalWrapper
 from datahub.emitter.rest_emitter import DatahubRestEmitter
 from huggingface_hub import ModelCard
-from transformers import DistilBertTokenizer, TFDistilBertForQuestionAnswering
+from transformers import AutoModel, AutoTokenizer, AutoModelForCausalLM
 from dotenv import load_dotenv
 import os
 import mlflow
@@ -13,6 +13,7 @@ import mlflow.pyfunc
 import logging
 import traceback
 import requests
+from huggingface_hub import create_repo
 from app.analytics import config
 
 load_dotenv()
@@ -23,6 +24,7 @@ def send_metadata(model_name: str,
                   env: str,
                   gms_server: str,
                   model_description: str = None):
+    logging.info("Updating metadata catalog...")
     with mlflow.start_run(run_name='send_metadata', nested=True):
         emitter = DatahubRestEmitter(gms_server=gms_server, extra_headers={})
         model_urn = builder.make_ml_model_urn(
@@ -50,13 +52,16 @@ def ingest_metadata_from_huggingface_model(model_name: str):
 
 
 def publish_model(repo_name: str, pretrained_model_name: str):
+    logging.info("Publishing model to Hub...")
     with mlflow.start_run(run_name='publish_model', nested=True):
         model_name = f"tanzuhuggingface/{repo_name}"
 
-        print(f"=====================\nSaving model {model_name}...\n=====================\n")
+        logging.info("=====================\nCreating model repo if it does not exist...\n=====================\n")
+        create_repo(model_name, token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'), exist_ok=True)
 
-        model = DistilBertTokenizer.from_pretrained(pretrained_model_name)
-        tokenizer = TFDistilBertForQuestionAnswering.from_pretrained(pretrained_model_name)
+        logging.info(f"=====================\nSaving model {model_name}...\n=====================\n")
+        tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name)
+        model = AutoModelForCausalLM.from_pretrained(pretrained_model_name)
         model.save_pretrained(pretrained_model_name)
         tokenizer.save_pretrained(pretrained_model_name)
         model.push_to_hub(model_name, max_shard_size='2GB', use_auth_token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))
@@ -64,7 +69,7 @@ def publish_model(repo_name: str, pretrained_model_name: str):
 
 
 def promote_model_to_staging(model_name, pipeline_name):
-
+    logging.info("Promoting model to staging...")
     # TODO: Determine correct version to update
     with mlflow.start_run(run_name='promote_model_to_staging', nested=True) as run:
         client = MlflowClient()

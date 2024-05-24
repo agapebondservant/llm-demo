@@ -1,23 +1,22 @@
 name: question_answering_deployment_pipeline
 
 entry_points:
-  publish_model:
-    parameters:
-        model-repo: {default: "question-answering-finetuned"}
-        pretrained-model-name: {default: "distilbert-base-cased-distilled-squad"}
-    command: '$(which python3) -c "from app.analytics import model_customization; model_customization.publish_model(\"{model-repo}\", \"{pretrained-model-name}\")"'
+  upload_dataset:
+    command: 'python upload_dataset.py'
 
-  send_metadata:
-    parameters:
-        model-repo: {default: "question-answering-finetuned"}
-        platform: {default: "nlp"}
-        env: {default: "DEV"}
-        gms-server: {default: "http://datahub-gms-datahub.tanzumlai.com"}
-        model-description: {default: "Fine-tuned DistilBERT model"}
-    command: '$(which python3) -c "from app.analytics import model_customization; import os; model_customization.send_metadata(\"tanzuhuggingface/{model-repo}\",\"{platform}\",\"{env}\",\"{gms-server}\",\"{model-description}\")"'
+  train_model:
+    command: 'python train_model.py'
+
+  evaluate_model:
+      command: 'python evaluate_model.py'
 
   promote_model_to_staging:
       parameters:
           model-repo: {default: "question-answering-finetuned"}
+          pretrained-model-name: {default: "distilbert-base-cased-distilled-squad"}
+          platform: {default: "nlp"}
+          env: {default: "DEV"}
+          gms-server: {default: "http://datahub-gms-datahub.tanzumlai.com"}
+          model-description: {default: "Fine-tuned DistilBERT model"}
           pipeline-name: {default: "question-answering"}
-      command: '$(which python3) -c "from app.analytics import model_customization; model_customization.promote_model_to_staging(\"tanzuhuggingface/{model-repo}\",\"{pipeline-name}\")"'
+      command: 'python promote_model_to_staging.py "{model-repo}" "{pretrained-model-name}" "{platform}" "{env}" "{gms-server}" "{model-description}" "{pipeline-name}"'

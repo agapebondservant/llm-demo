@@ -16,3 +16,4 @@ slack/
 resources/db/schemaspy/*.jar
 resources/db/schemaspy/
 driver/
+llm-huggingface-token-secret.yaml

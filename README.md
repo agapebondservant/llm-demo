@@ -289,8 +289,9 @@ kubectl -n argo exec $(kubectl get pod -n argo -l 'app=argo-server' -o jsonpath=
 ```
 source .env
 envsubst < resources/appcr/pipeline_configmap.in.yaml > resources/appcr/pipeline_configmap.yaml
-kubectl delete -f resources/appcr/pipeline_configmap.yaml -n argo
-kubectl apply -f resources/appcr/pipeline_configmap.yaml -n argo
+# kubectl delete -f resources/appcr/pipeline_configmap.yaml -n argo
+# kubectl apply -f resources/appcr/pipeline_configmap.yaml -n argo
+kapp deploy -a huggingface-tanzudev-configmap-monitor-<THE PIPELINE ENVIRONMENT> -f resources/appcr/pipeline_configmap_app.yaml --logs -y  -nargo
 kapp deploy -a huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -f resources/appcr/pipeline_app.yaml --logs -y  -nargo
 ```
 
@@ -302,6 +303,7 @@ kubectl get app huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -oyaml  
 * To delete the pipeline:
 ```
 kapp delete -a huggingface-tanzudev-monitor-<THE PIPELINE ENVIRONMENT> -y -nargo
+kapp delete -a huggingface-tanzudev-configmap-monitor-<THE PIPELINE ENVIRONMENT> -y -nargo
 ```
 
 ### Set up other Argo Pipelines<a name="argopipelines"/>

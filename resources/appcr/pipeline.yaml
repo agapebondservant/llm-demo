@@ -55,6 +55,7 @@ spec:
             value: #@ data.values.environment_name
       container:
         image: oawofolu/llm-image-processor
+        imagePullPolicy: Always
         command: [ python ]
         env:
           - name: DATA_E2E_HUGGINGFACE_TOKEN

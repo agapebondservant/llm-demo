@@ -64,8 +64,8 @@ def publish_model(repo_name: str, pretrained_model_name: str):
         model = AutoModel.from_pretrained(pretrained_model_name)
         model.save_pretrained(pretrained_model_name)
         tokenizer.save_pretrained(pretrained_model_name)
-        model.push_to_hub(model_name, max_shard_size='2GB', use_auth_token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))
-        tokenizer.push_to_hub(model_name, use_auth_token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))
+        model.push_to_hub(model_name, max_shard_size='2GB', token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))
+        tokenizer.push_to_hub(model_name, token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))
 
 
 def promote_model_to_staging(model_name, pipeline_name):
@@ -82,7 +82,7 @@ def promote_model_to_staging(model_name, pipeline_name):
 
         registered_model_name = model_name.replace('/', '-')
         model_uri = f"runs:/{run.info.run_id}/{pipeline_name}"
-        client.register_model(model_uri, registered_model_name)
+        mlflow.register_model(model_uri, registered_model_name)
         mv = client.create_model_version(registered_model_name, model_uri, run.info.run_id)
 
         # Promote to staging

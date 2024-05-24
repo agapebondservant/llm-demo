@@ -61,7 +61,7 @@ def publish_model(repo_name: str, pretrained_model_name: str):
 
         logging.info(f"=====================\nSaving model {model_name}...\n=====================\n")
         tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name)
-        model = AutoModelForCausalLM.from_pretrained(pretrained_model_name)
+        model = _select_base_llm_class(pretrained_model_name)
         model.save_pretrained(pretrained_model_name)
         tokenizer.save_pretrained(pretrained_model_name)
         model.push_to_hub(model_name, max_shard_size='2GB', token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))
@@ -117,4 +117,19 @@ def select_base_llm():
     default_model = config.fallback_model_name
             
     return default_model
+
+
+def _select_base_llm_class(pretrained_model_name):
+    for m in [AutoModelForCausalLM, TFAutoModelForQuestionAnswering]:
+        try:
+            model = m.from_pretrained(pretrained_model_name)
+            return model
+        except Exception as e:
+            logging.info(str(e))
+            logging.info(''.join(traceback.TracebackException.from_exception(e).format()))
+            continue
+    logging.error("Could not load task-specific base class, will use AutoModel...")
+    return AutoModel
+
+
 

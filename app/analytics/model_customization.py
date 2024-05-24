@@ -61,7 +61,7 @@ def publish_model(repo_name: str, pretrained_model_name: str):
 
         logging.info(f"=====================\nSaving model {model_name}...\n=====================\n")
         tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name)
-        model = AutoModelForCausalLM.from_pretrained(pretrained_model_name)
+        model = AutoModel.from_pretrained(pretrained_model_name)
         model.save_pretrained(pretrained_model_name)
         tokenizer.save_pretrained(pretrained_model_name)
         model.push_to_hub(model_name, max_shard_size='2GB', use_auth_token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))

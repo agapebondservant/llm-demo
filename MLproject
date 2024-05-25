@@ -13,7 +13,7 @@ entry_points:
   promote_model_to_staging:
       parameters:
           model-repo: {default: "question-answering-phi3-finetuned"}
-          pretrained-model-name: {default: "microsoft/Phi-3-mini-4k-instruct-onnx"}
+          pretrained-model-name: {default: "microsoft/Phi-3-mini-4k-instruct"}
           platform: {default: "nlp"}
           env: {default: "DEV"}
           gms-server: {default: "http://datahub-gms-datahub.tanzumlai.com"}

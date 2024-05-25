@@ -64,4 +64,12 @@ urllib3<2
 GitPython
 pydantic==2.6.0
 tf-keras
+onnxruntime
+onnx
+ort-nightly
+--extra-index-url=https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/ORT-Nightly/pypi/simple/
+--pre
+onnxruntime-genai
+--extra-index-url=https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-genai/pypi/simple/
+--pre
 .

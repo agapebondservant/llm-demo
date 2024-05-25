@@ -61,8 +61,8 @@ def publish_model(repo_name: str, pretrained_model_name: str):
         create_repo(model_name, token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'), exist_ok=True)
 
         logging.info(f"=====================\nSaving model {model_name}...\n=====================\n")
-        tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name, trust_remote_code=True)
         model = _select_base_llm_class(pretrained_model_name)
+        tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name, trust_remote_code=True)
         model.save_pretrained(pretrained_model_name)
         tokenizer.save_pretrained(pretrained_model_name)
         model.push_to_hub(model_name, max_shard_size='2GB', token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))

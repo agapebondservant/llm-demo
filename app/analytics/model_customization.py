@@ -15,6 +15,7 @@ import traceback
 import requests
 from huggingface_hub import create_repo
 from app.analytics import config
+import torch
 
 load_dotenv()
 
@@ -39,7 +40,7 @@ def send_metadata(model_name: str,
             aspectName="mlModelProperties",
             aspect=models.MLModelPropertiesClass(
                 description=model_card.text,
-                customProperties={**{k: ','.join(v) for (k, v) in model_card.data.to_dict().items()},
+                customProperties={**{k: ','.join(str(v)) for (k, v) in model_card.data.to_dict().items()},
                                   **{'Last Updated': ''}})
     )
 
@@ -122,7 +123,11 @@ def select_base_llm():
 def _select_base_llm_class(pretrained_model_name):
     for m in [AutoModelForCausalLM, TFAutoModelForQuestionAnswering]:
         try:
-            model = m.from_pretrained(pretrained_model_name)
+            model = m.from_pretrained(pretrained_model_name,
+                                      torch_dtype=torch.bfloat16,
+                                      device_map='cpu',
+                                      low_cpu_mem_usage=True,
+                                      trust_remote_code=True)
             return model
         except Exception as e:
             logging.info(str(e))

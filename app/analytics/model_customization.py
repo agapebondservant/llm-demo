@@ -55,7 +55,7 @@ def ingest_metadata_from_huggingface_model(model_name: str):
 def publish_model(repo_name: str, pretrained_model_name: str):
     logging.info("Publishing model to Hub...")
     with mlflow.start_run(run_name='publish_model', nested=True):
-        model_name = f"tanzuhuggingface/{repo_name}"
+        model_name = repo_name
 
         logging.info("=====================\nCreating model repo if it does not exist...\n=====================\n")
         create_repo(model_name, token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'), exist_ok=True)
@@ -69,16 +69,26 @@ def publish_model(repo_name: str, pretrained_model_name: str):
         tokenizer.push_to_hub(model_name, token=os.getenv('DATA_E2E_HUGGINGFACE_TOKEN'))
 
 
-def promote_model_to_staging(model_name, pipeline_name):
+def promote_model_to_staging(model_name, pipeline_name, persist_model_copy: str):
     logging.info("Promoting model to staging...")
-    # TODO: Determine correct version to update
     with mlflow.start_run(run_name='promote_model_to_staging', nested=True) as run:
         client = MlflowClient()
 
         qa_pipe = pipeline(pipeline_name, model_name)
+        # If persist_model_copy is "yes", save a version of the model which stores a full copy in the model registry
+        if persist_model_copy == "yes":
+            logging.info("Saving full copy of the model...")
+            mlflow.transformers.log_model(
+                transformers_model=qa_pipe,
+                artifact_path=pipeline_name,
+            )
+
+        # Save a version of the model which stores a link to the source model repo
+        logging.info("Saving link to source model repo...")
         mlflow.transformers.log_model(
             transformers_model=qa_pipe,
             artifact_path=pipeline_name,
+            save_pretrained=False,
         )
 
         registered_model_name = model_name.replace('/', '-')
@@ -108,7 +118,10 @@ def select_base_llm():
         model_api_uri = f'{os.getenv("MLFLOW_TRACKING_URI")}/api/2.0/mlflow/registered-models/alias?name={model_name}&alias={config.model_alias}'
         models = requests.get(model_api_uri).json()
         if 'model_version' in models:
-            return config.model_name
+            if 'source' in models['model_version']:
+                return models['model_version'].get('source')
+            elif 'source_model_name' in models['model_version']:
+                return models['model_version'].get('source_model_name')
     except Exception as e:
         logging.error(f"Registered model name={model_name}, alias={config.model_alias} not found.")
         logging.info(str(e))

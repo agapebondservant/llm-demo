@@ -12,11 +12,12 @@ entry_points:
 
   promote_model_to_staging:
       parameters:
-          model-repo: {default: "question-answering-phi3-finetuned"}
+          model-repo: {default: "tanzuhuggingface/question-answering-phi3-finetuned"}
           pretrained-model-name: {default: "microsoft/Phi-3-mini-4k-instruct"}
           platform: {default: "nlp"}
           env: {default: "DEV"}
           gms-server: {default: "http://datahub-gms-datahub.tanzumlai.com"}
-          model-description: {default: "Fine-tuned DistilBERT model"}
+          model-description: {default: "Fine-tuned Phi-3 model"}
           pipeline-name: {default: "question-answering"}
-      command: 'python promote_model_to_staging.py "{model-repo}" "{pretrained-model-name}" "{platform}" "{env}" "{gms-server}" "{model-description}" "{pipeline-name}"'
+          persist-model-copy: {default: "yes"}
+      command: 'python promote_model_to_staging.py "{model-repo}" "{pretrained-model-name}" "{platform}" "{env}" "{gms-server}" "{model-description}" "{pipeline-name}" "{persist-model-copy}"'

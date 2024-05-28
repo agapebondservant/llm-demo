@@ -18,6 +18,6 @@ entry_points:
           env: {default: "DEV"}
           gms-server: {default: "http://datahub-gms-datahub.tanzumlai.com"}
           model-description: {default: "Fine-tuned Phi-3 model"}
-          pipeline-name: {default: "question-answering"}
+          pipeline-name: {default: "text-generation"}
           persist-model-copy: {default: "yes"}
       command: 'python promote_model_to_staging.py "{model-repo}" "{pretrained-model-name}" "{platform}" "{env}" "{gms-server}" "{model-description}" "{pipeline-name}" "{persist-model-copy}"'

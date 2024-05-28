@@ -13,8 +13,6 @@ accelerator:
   - "LLMOps"
   - "LLM"
   - "mlflow"
-  - "sample"
-  - "pipeline"
   options:
     - name: llmHuggingFaceRepo
       inputType: text

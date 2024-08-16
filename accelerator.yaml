@@ -1,156 +1,31 @@
 accelerator:
-  displayName: LLM Finetuning
-  description: Template for finetuning an LLM using Pytorch, Huggingface Transformers, MLflow, Argo Workflows and Deepeval
-  iconUrl: https://cdn-icons-png.flaticon.com/512/3696/3696693.png
+  displayName: LLM Demo on TAP
+  description: Project template for demonstrating LLM integration with TAP, VMware Data, Mlflow and Argo Workflows
+  iconUrl: https://upload.wikimedia.org/wikipedia/commons/1/1b/ML_Ops_Venn_Diagram.svg
   tags:
     - "ML"
     - "AI"
-    - "genai"
-    - "generativeai"
-    - "llm"
-    - "artificialintelligence"
-    - "llmops"
     - "machinelearning"
     - "datascience"
     - "MLOps"
+    - "artificialintelligence"
     - "python"
+    - "LLMOps"
+    - "LLM"
     - "mlflow"
-    - "sample"
-    - "pipeline"
-
   options:
-    - name: targetLlm
-      inputType: select
-      label: "Target LLM"
-      choices:
-        - text: "--Select an LLM--"
-          value: "none"
-        - value: pythia
-          text: "EleutherAI/pythia-410m"
-        - value: mistral
-          text: "mistralai/Mistral-7B-v0.1"
-        - value: microsoft
-          text: "microsoft/Phi-3-mini-4k-instruct"
-      defaultValue: "none"
-      required: true
-    - name: targetLlmVersion
-      inputType: text
-      label: "Target LLM Version"
-      defaultValue: "1.0"
-      required: true
-    - name: teacherLlm
-      inputType: select
-      label: "Teacher LLM"
-      choices:
-        - text: "--Select an LLM--"
-          value: "none"
-        - value: pythia
-          text: "EleutherAI/pythia-410m"
-        - value: mistral
-          text: "mistralai/Mistral-7B-v0.1"
-        - value: microsoft
-          text: "microsoft/Phi-3-mini-4k-instruct"
-      defaultValue: "none"
-      required: true
-    - name: teacherLlmVersion
-      inputType: text
-      label: "Teacher LLM Version"
-      defaultValue: "1.0"
-      required: true
-    - name: evaluationLlm
-      inputType: select
-      label: "Evaluation LLM"
-      choices:
-        - text: "--Select an LLM--"
-          value: "none"
-        - value: pythia
-          text: "EleutherAI/pythia-410m"
-        - value: mistral
-          text: "mistralai/Mistral-7B-v0.1"
-        - value: microsoft
-          text: "microsoft/Phi-3-mini-4k-instruct"
-      defaultValue: "none"
-      required: true
-    - name: evaluationLlmVersion
-      inputType: text
-      label: "LLM Version"
-      defaultValue: "1.0"
-      required: true
-    - name: dataset
+    - name: llmHuggingFaceRepo
       inputType: text
       display: true
-      label: 'Dataset'
-      required: true
-    - name: mlopsPlatformEndpoint
-      inputType: text
-      display: true
-      label: 'MLOps Platform Endpoint (ex. can point to MLflow, Weights & Biases, Kubeflow, etc)'
-      required: true
-    - name: trainingComputeEndpoint
-      inputType: text
-      display: true
-      label: 'Training Compute Endpoint (ex. can point to Ray, Spark, etc)'
-      required: true
-    - name: mlGovernanceEndpoint
-      inputType: text
-      display: true
-      label: 'ML / Data Governance Platform Endpoint'
-      required: true
-    - name: mlObservabilityEndpoint
-      inputType: text
-      display: true
-      label: 'ML Observability Platform Endpoint'
-      required: true
-    - name: llmGatewayEndpoint
-      inputType: select
-      label: "LLM Gateway Endpoint"
-      required: true
-    - name: llmGatewayToken
-      inputType: select
-      label: "LLM Gateway Token"
-      choices:
-        - value: "none"
-          text: "--Select a token--"
-        - value: "hub-token"
-          text: Hub Token
-      defaultValue: "none"
-      required: true
-
+      label: 'Hugging Face Repository: Target HuggingFace Repo'
 engine:
   type: Merge
   sources:
     - type: Chain
       transformations:
         - type: Include
-          patterns: [ '**/**' ]
-        - type: Exclude
-          patterns: [ 'slack-data', 'slack-tmp', 'driver', 'docs', 'resources/huggingface', 'resources/scripts', 'resources/tapworkloads', 'resources/argo', 'resources/datahub', 'resources/db', 'resources/gpu' ]
+          patterns: [ 'resources/**' ]
         - type: ReplaceText
           substitutions:
-            - text: REPLACE_TARGET_LLM
-              with: "#targetLlm"
-            - text: REPLACE_TARGET_LLM_VERSION
-              with: "#targetLlmVersion"
-            - text: REPLACE_TEACHER_LLM
-              with: "#teacherLlm"
-            - text: REPLACE_TEACHER_LLM_VERSION
-              with: "#teacherLlmVersion"
-            - text: REPLACE_EVALUATION_LLM
-              with: "#evaluationLlm"
-            - text: REPLACE_EVALUATION_LLM_VERSION
-              with: "#evaluationLlmVersion"
-            - text: REPLACE_DATASET
-              with: "#dataset"
-            - text: REPLACE_MLOPS_PLATFORM_ENDPOINT
-              with: "#mlopsPlatformEndpoint"
-            - text: REPLACE_TRAINING_COMPUTE_ENDPOINT
-              with: "#trainingComputeEndpoint"
-            - text: REPLACE_ML_GOVERNANCE_ENDPOINT
-              with: "#mlGovernanceEndpoint"
-            - text: REPLACE_ML_OBSERVABILITY_ENDPOINT
-              with: "#mlObservabilityEndpoint"
-            - text: REPLACE_LLM_GATEWAY_TOKEN
-              with: "#llmGatewayToken"
-        - type: RewritePath
-          regex: MLProjecttemplate
-          rewriteTo: MLProject
+            - text: LLM_HUGGINGFACE_REPO
+              with: "#llmHuggingFaceRepo"

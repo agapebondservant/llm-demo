@@ -123,6 +123,8 @@ engine:
       transformations:
         - type: Include
           patterns: [ '**/**' ]
+        - type: Exclude
+          patterns: [ 'slack-data', 'slack-tmp', 'driver', 'docs', 'resources/huggingface', 'resources/scripts', 'resources/tapworkloads', 'resources/argo', 'resources/datahub', 'resources/db', 'resources/gpu' ]
         - type: ReplaceText
           substitutions:
             - text: REPLACE_TARGET_LLM
@@ -150,7 +152,7 @@ engine:
             - text: REPLACE_LLM_GATEWAY_TOKEN
               with: "#llmGatewayToken"
         - type: RewritePath
-          regex: MLProject_template
+          regex: MLProjecttemplate
           rewriteTo: MLProject
         - type: UniquePath
           strategy: UseLast

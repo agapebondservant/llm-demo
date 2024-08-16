@@ -79,12 +79,12 @@ accelerator:
     - name: mlopsPlatformEndpoint
       inputType: text
       display: true
-      label: 'MLOps Platform Endpoint (ex. can point to MLflow, Weights & Biases, Kubeflow, etc)'
+      label: 'MLOps Platform Endpoint (can point to MLflow, Weights & Biases, Kubeflow, etc)'
       defaultValue: ""
     - name: trainingComputeEndpoint
       inputType: text
       display: true
-      label: 'Training Compute Endpoint (ex. can point to Ray, Spark, etc)'
+      label: 'Training Compute Endpoint (can point to Ray, Spark, etc)'
       defaultValue: ""
     - name: mlGovernanceEndpoint
       inputType: text
@@ -118,7 +118,7 @@ engine:
         - type: Include
           patterns: [ '**/**' ]
         - type: Exclude
-          patterns: [ 'slack-data', 'slack-tmp', 'driver', 'docs', 'resources/huggingface', 'resources/scripts', 'resources/tapworkloads', 'resources/argo', 'resources/datahub', 'resources/db', 'resources/gpu' ]
+          patterns: [ 'slack-data/**', 'slack-tmp/**', 'driver/**', 'docs/**', 'resources/huggingface', 'resources/scripts', 'resources/tapworkloads', 'resources/argo', 'resources/datahub', 'resources/db', 'resources/gpu' ]
         - type: ReplaceText
           substitutions:
             - text: REPLACE_TARGET_LLM

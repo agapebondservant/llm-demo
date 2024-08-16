@@ -17,3 +17,4 @@ resources/db/schemaspy/*.jar
 resources/db/schemaspy/
 driver/
 llm-huggingface-token-secret.yaml
+resources/argo/argo-workflow-http-proxy.yaml

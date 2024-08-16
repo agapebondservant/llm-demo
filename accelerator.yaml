@@ -151,6 +151,3 @@ engine:
               with: "#mlObservabilityEndpoint"
             - text: REPLACE_LLM_GATEWAY_TOKEN
               with: "#llmGatewayToken"
-        - type: RewritePath
-          regex: MLProjecttemplate
-          rewriteTo: MLProject

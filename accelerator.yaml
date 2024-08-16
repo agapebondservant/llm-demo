@@ -32,6 +32,88 @@ accelerator:
           text: "microsoft/Phi-3-mini-4k-instruct"
       defaultValue: "none"
       required: true
+    - name: targetLlmVersion
+      inputType: text
+      label: "Target LLM Version"
+      defaultValue: "1.0"
+      required: true
+    - name: teacherLlm
+      inputType: select
+      label: "Teacher LLM"
+      choices:
+        - text: "--Select an LLM--"
+          value: "none"
+        - value: pythia
+          text: "EleutherAI/pythia-410m"
+        - value: mistral
+          text: "mistralai/Mistral-7B-v0.1"
+        - value: microsoft
+          text: "microsoft/Phi-3-mini-4k-instruct"
+      defaultValue: "none"
+      required: true
+    - name: teacherLlmVersion
+      inputType: text
+      label: "Teacher LLM Version"
+      defaultValue: "1.0"
+      required: true
+    - name: evaluationLlm
+      inputType: select
+      label: "Evaluation LLM"
+      choices:
+        - text: "--Select an LLM--"
+          value: "none"
+        - value: pythia
+          text: "EleutherAI/pythia-410m"
+        - value: mistral
+          text: "mistralai/Mistral-7B-v0.1"
+        - value: microsoft
+          text: "microsoft/Phi-3-mini-4k-instruct"
+      defaultValue: "none"
+      required: true
+    - name: evaluationLlmVersion
+      inputType: text
+      label: "LLM Version"
+      defaultValue: "1.0"
+      required: true
+    - name: dataset
+      inputType: text
+      display: true
+      label: 'Dataset'
+      required: true
+    - name: mlopsPlatformEndpoint
+      inputType: text
+      display: true
+      label: 'MLOps Platform Endpoint (ex. can point to MLflow, Weights & Biases, Kubeflow, etc)'
+      required: true
+    - name: trainingComputeEndpoint
+      inputType: text
+      display: true
+      label: 'Training Compute Endpoint (ex. can point to Ray, Spark, etc)'
+      required: true
+    - name: mlGovernanceEndpoint
+      inputType: text
+      display: true
+      label: 'ML / Data Governance Platform Endpoint'
+      required: true
+    - name: mlObservabilityEndpoint
+      inputType: text
+      display: true
+      label: 'ML Observability Platform Endpoint'
+      required: true
+    - name: llmGatewayEndpoint
+      inputType: select
+      label: "LLM Gateway Endpoint"
+      required: true
+    - name: llmGatewayToken
+      inputType: select
+      label: "LLM Gateway Token"
+      choices:
+        - value: "none"
+          text: "--Select a token--"
+        - value: "hub-token"
+          text: Hub Token
+      defaultValue: "none"
+      required: true
 
 engine:
   type: Merge

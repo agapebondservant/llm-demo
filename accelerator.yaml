@@ -33,12 +33,11 @@ accelerator:
           text: "microsoft/Phi-3-mini-4k-instruct"
       defaultValue: "none"
       required: true
-
     - name: targetLlmVersion
       inputType: text
       label: "Target LLM Version"
       defaultValue: "1.0"
-
+      required: true
     - name: teacherLlm
       inputType: select
       label: "Teacher LLM"
@@ -57,6 +56,7 @@ accelerator:
       inputType: text
       label: "Teacher LLM Version"
       defaultValue: "1.0"
+      required: true
     - name: evaluationLlm
       inputType: select
       label: "Evaluation LLM"
@@ -75,26 +75,36 @@ accelerator:
       inputType: text
       label: "LLM Version"
       defaultValue: "1.0"
+      required: true
     - name: dataset
       inputType: text
       display: true
       label: 'Dataset'
+      required: false
     - name: mlopsPlatformEndpoint
       inputType: text
       display: true
-      label: 'MLOps Platform Endpoint (ex. MLflow, Weights & Biases, Kubeflow, etc)'
+      label: 'MLOps Platform Endpoint (ex. can point to MLflow, Weights & Biases, Kubeflow, etc)'
+      required: false
     - name: trainingComputeEndpoint
       inputType: text
       display: true
-      label: 'Training Compute Endpoint'
+      label: 'Training Compute Endpoint (ex. can point to Ray, Spark, etc)'
+      required: false
     - name: mlGovernanceEndpoint
       inputType: text
       display: true
       label: 'ML / Data Governance Platform Endpoint'
+      required: false
     - name: mlObservabilityEndpoint
       inputType: text
       display: true
       label: 'ML Observability Platform Endpoint'
+      required: false
+    - name: llmGatewayEndpoint
+      inputType: select
+      label: "LLM Gateway Endpoint"
+      required: false
     - name: llmGatewayToken
       inputType: select
       label: "LLM Gateway Token"
@@ -104,7 +114,7 @@ accelerator:
         - value: "hub-token"
           text: Hub Token
       defaultValue: "none"
-      required: true
+      required: false
 
 engine:
   type: Merge

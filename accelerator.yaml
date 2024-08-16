@@ -154,5 +154,3 @@ engine:
         - type: RewritePath
           regex: MLProjecttemplate
           rewriteTo: MLProject
-        - type: UniquePath
-          strategy: UseLast

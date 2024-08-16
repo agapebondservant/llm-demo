@@ -15,6 +15,8 @@ accelerator:
     - "MLOps"
     - "python"
     - "mlflow"
+    - "sample"
+    - "pipeline"
 
   options:
     - name: targetLlm

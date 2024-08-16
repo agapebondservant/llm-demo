@@ -80,31 +80,31 @@ accelerator:
       inputType: text
       display: true
       label: 'Dataset'
-      required: false
+      required: true
     - name: mlopsPlatformEndpoint
       inputType: text
       display: true
       label: 'MLOps Platform Endpoint (ex. can point to MLflow, Weights & Biases, Kubeflow, etc)'
-      required: false
+      required: true
     - name: trainingComputeEndpoint
       inputType: text
       display: true
       label: 'Training Compute Endpoint (ex. can point to Ray, Spark, etc)'
-      required: false
+      required: true
     - name: mlGovernanceEndpoint
       inputType: text
       display: true
       label: 'ML / Data Governance Platform Endpoint'
-      required: false
+      required: true
     - name: mlObservabilityEndpoint
       inputType: text
       display: true
       label: 'ML Observability Platform Endpoint'
-      required: false
+      required: true
     - name: llmGatewayEndpoint
       inputType: select
       label: "LLM Gateway Endpoint"
-      required: false
+      required: true
     - name: llmGatewayToken
       inputType: select
       label: "LLM Gateway Token"
@@ -114,7 +114,7 @@ accelerator:
         - value: "hub-token"
           text: Hub Token
       defaultValue: "none"
-      required: false
+      required: true
 
 engine:
   type: Merge
@@ -123,6 +123,8 @@ engine:
       transformations:
         - type: Include
           patterns: [ '**/**' ]
+        - type: Exclude
+          patterns: [ 'slack-data', 'slack-tmp', 'driver', 'docs', 'resources/huggingface', 'resources/scripts', 'resources/tapworkloads', 'resources/argo', 'resources/datahub', 'resources/db', 'resources/gpu' ]
         - type: ReplaceText
           substitutions:
             - text: REPLACE_TARGET_LLM
@@ -149,3 +151,6 @@ engine:
               with: "#mlObservabilityEndpoint"
             - text: REPLACE_LLM_GATEWAY_TOKEN
               with: "#llmGatewayToken"
+        - type: RewritePath
+          regex: MLProjecttemplate
+          rewriteTo: MLProject

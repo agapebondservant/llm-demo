@@ -84,26 +84,26 @@ accelerator:
       inputType: text
       display: true
       label: 'MLOps Platform Endpoint (ex. can point to MLflow, Weights & Biases, Kubeflow, etc)'
-      required: true
+      required: false
     - name: trainingComputeEndpoint
       inputType: text
       display: true
       label: 'Training Compute Endpoint (ex. can point to Ray, Spark, etc)'
-      required: true
+      required: false
     - name: mlGovernanceEndpoint
       inputType: text
       display: true
       label: 'ML / Data Governance Platform Endpoint'
-      required: true
+      required: false
     - name: mlObservabilityEndpoint
       inputType: text
       display: true
       label: 'ML Observability Platform Endpoint'
-      required: true
+      required: false
     - name: llmGatewayEndpoint
-      inputType: select
+      inputType: text
       label: "LLM Gateway Endpoint"
-      required: true
+      required: false
     - name: llmGatewayToken
       inputType: select
       label: "LLM Gateway Token"
@@ -113,7 +113,7 @@ accelerator:
         - value: "hub-token"
           text: Hub Token
       defaultValue: "none"
-      required: true
+      required: false
 
 engine:
   type: Merge
@@ -128,6 +128,28 @@ engine:
           substitutions:
             - text: REPLACE_TARGET_LLM
               with: "#targetLlm"
+            - text: REPLACE_TARGET_LLM_VERSION
+              with: "#targetLlmVersion"
+            - text: REPLACE_TEACHER_LLM
+              with: "#teacherLlm"
+            - text: REPLACE_TEACHER_LLM_VERSION
+              with: "#teacherLlmVersion"
+            - text: REPLACE_EVALUATION_LLM
+              with: "#evaluationLlm"
+            - text: REPLACE_EVALUATION_LLM_VERSION
+              with: "#evaluationLlmVersion"
+            - text: REPLACE_DATASET
+              with: "#dataset"
+            - text: REPLACE_MLOPS_PLATFORM_ENDPOINT
+              with: "#mlopsPlatformEndpoint"
+            - text: REPLACE_TRAINING_COMPUTE_ENDPOINT
+              with: "#trainingComputeEndpoint"
+            - text: REPLACE_ML_GOVERNANCE_ENDPOINT
+              with: "#mlGovernanceEndpoint"
+            - text: REPLACE_ML_OBSERVABILITY_ENDPOINT
+              with: "#mlObservabilityEndpoint"
+            - text: REPLACE_LLM_GATEWAY_TOKEN
+              with: "#llmGatewayToken"
         - type: RewritePath
           regex: MLProjecttemplate
           rewriteTo: MLProject

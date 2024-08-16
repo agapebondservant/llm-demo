@@ -118,7 +118,7 @@ engine:
         - type: Include
           patterns: [ '**/**' ]
         - type: Exclude
-          patterns: [ 'slack-data/**', 'slack-tmp/**', 'driver/**', 'docs/**', 'resources/huggingface', 'resources/scripts', 'resources/tapworkloads', 'resources/argo', 'resources/datahub', 'resources/db', 'resources/gpu' ]
+          patterns: [ 'README.md', 'slack-data/**', 'slack-tmp/**', 'driver/**', 'docs/**', 'resources/huggingface/**', 'resources/scripts/**', 'resources/tapworkloads/**', 'resources/argo/**', 'resources/datahub/**', 'resources/db/**', 'resources/gpu/**' ]
         - type: ReplaceText
           substitutions:
             - text: REPLACE_TARGET_LLM

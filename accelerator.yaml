@@ -152,7 +152,7 @@ engine:
             - text: REPLACE_LLM_GATEWAY_TOKEN
               with: "#llmGatewayToken"
         - type: RewritePath
-          regex: "MLProject.template"
+          regex: "MLProject\.template"
           rewriteTo: MLProject
         - type: UniquePath
           strategy: UseLast

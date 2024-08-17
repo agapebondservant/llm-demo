@@ -25,11 +25,11 @@ accelerator:
         - text: "--Select an LLM--"
           value: "none"
         - value: pythia
-          text: "EleutherAI/pythia-410m"
+          text: "tanzuml/pythia-410m"
         - value: mistral
-          text: "mistralai/Mistral-7B-v0.1"
+          text: "tanzuml/Mistral-7B-v0.1"
         - value: microsoft
-          text: "microsoft/Phi-3-mini-4k-instruct"
+          text: "tanzuml/Phi-3-mini-4k-instruct"
       defaultValue: "none"
       required: true
     - name: targetLlmVersion
@@ -44,11 +44,11 @@ accelerator:
         - text: "--Select an LLM--"
           value: "none"
         - value: pythia
-          text: "EleutherAI/pythia-410m"
+          text: "tanzuml/pythia-410m"
         - value: mistral
-          text: "mistralai/Mistral-7B-v0.1"
+          text: "tanzuml/Mistral-7B-v0.1"
         - value: microsoft
-          text: "microsoft/Phi-3-mini-4k-instruct"
+          text: "tanzuml/Phi-3-mini-4k-instruct"
       defaultValue: "none"
     - name: teacherLlmVersion
       inputType: text
@@ -61,11 +61,11 @@ accelerator:
         - text: "--Select an LLM--"
           value: "none"
         - value: pythia
-          text: "EleutherAI/pythia-410m"
+          text: "tanzuml/pythia-410m"
         - value: mistral
-          text: "mistralai/Mistral-7B-v0.1"
+          text: "tanzuml/Mistral-7B-v0.1"
         - value: microsoft
-          text: "microsoft/Phi-3-mini-4k-instruct"
+          text: "tanzuml/Phi-3-mini-4k-instruct"
       defaultValue: "none"
     - name: evaluationLlmVersion
       inputType: text

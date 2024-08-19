@@ -39,7 +39,7 @@ accelerator:
       required: true
     - name: teacherLlm
       inputType: select
-      label: "Teacher LLM"
+      label: "Teacher LLM (for knowledge distillation tasks)"
       choices:
         - text: "--Select an LLM--"
           value: "none"
@@ -52,11 +52,11 @@ accelerator:
       defaultValue: "none"
     - name: teacherLlmVersion
       inputType: text
-      label: "Teacher LLM Version"
+      label: "Teacher LLM Version (for knowledge distillation tasks)"
       defaultValue: "1.0"
     - name: evaluationLlm
       inputType: select
-      label: "Evaluation LLM"
+      label: "Evaluation LLM (for LLM-as-judge tasks)"
       choices:
         - text: "--Select an LLM--"
           value: "none"
@@ -69,7 +69,7 @@ accelerator:
       defaultValue: "none"
     - name: evaluationLlmVersion
       inputType: text
-      label: "LLM Version"
+      label: "Evaluation LLM Version (for LLM-as-judge tasks)"
       defaultValue: "1.0"
     - name: dataset
       inputType: text

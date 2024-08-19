@@ -79,7 +79,7 @@ accelerator:
     - name: mlopsPlatformEndpoint
       inputType: text
       display: true
-      label: 'MLOps Platform Endpoint (can point to MLflow, Weights & Biases, Kubeflow, etc)'
+      label: 'MLOps Platform Endpoint (can point to VMware Private AI Foundation, MLflow, Weights & Biases, Kubeflow, etc)'
       defaultValue: ""
     - name: trainingComputeEndpoint
       inputType: text

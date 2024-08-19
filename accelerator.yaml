@@ -84,7 +84,7 @@ accelerator:
     - name: trainingComputeEndpoint
       inputType: text
       display: true
-      label: 'Training Compute Endpoint (can point to Ray, Spark, etc)'
+      label: 'Training Compute Endpoint (can point to VMware Private AI Foundation, Ray, Spark, etc)'
       defaultValue: ""
     - name: mlGovernanceEndpoint
       inputType: text
